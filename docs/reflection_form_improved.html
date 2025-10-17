@@ -44,6 +44,12 @@
     /* subtle pulse after success */
     .celebrate{animation:pop .9s ease-out}
     @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
+    /* Cash App modal styles */
+    .modal{position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:1200}
+    .modal.active{display:flex}
+    .modal .box{background:#fff;padding:18px;border-radius:12px;max-width:420px;width:94%;text-align:center;box-shadow:0 10px 40px rgba(2,6,23,0.3)}
+    .modal .qr{width:160px;height:160px;object-fit:contain;margin:8px auto}
+    .modal .actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
   </style>
 </head>
 <body>
@@ -108,6 +114,7 @@
             <img id="cashQr" alt="Cash App QR" style="max-width:100%;max-height:100%" src="" />
           </div>
         </div>
+        <label style="display:block;margin-top:10px"><input type="checkbox" id="requirePayment"> Require payment before submitting (opens Cash App)</label>
         <p class="small">After payment, please mark the payment in your records — form submission is independent and will be sent regardless of payment.</p>
       </section>
 
@@ -115,6 +122,20 @@
       <p id="formHelp" class="small">Responses are saved via Google Apps Script. If there's a problem, try again later — the browser will retry automatically.</p>
     </form>
   </main>
+
+  <!-- Cash App modal -->
+  <div id="cashModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cashModalTitle">
+    <div class="box">
+      <h3 id="cashModalTitle">Pay with Cash App</h3>
+      <p>Please complete the payment in Cash App. When done, tap "I paid — continue" to submit your reflection.</p>
+      <img id="modalQr" class="qr" src="" alt="Cash App QR" />
+      <p><a id="modalLink" href="#" target="_blank" rel="noopener">Open Cash App</a></p>
+      <div class="actions">
+        <button id="cancelPay" class="btn">Cancel</button>
+        <button id="iPaidBtn" class="btn primary">I paid — continue</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     (function(){
@@ -227,13 +248,60 @@
       window.addEventListener('online', () => { updateStatus(); flushQueue().catch(()=>{}); });
       window.addEventListener('offline', () => updateStatus());
 
-      form.addEventListener('submit', async function(e){
-        e.preventDefault();
+      // helper: perform the same send flow given a data object
+      async function sendData(data){
         feedback.innerHTML = '';
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Отправляем...';
+        submitBtn.disabled = true; submitBtn.textContent = 'Sending...';
+        try{
+          if(!navigator.onLine){
+            enqueue(data);
+            showMessage('ok', 'Offline — your response has been saved and will be sent when connection is restored.');
+            form.reset(); updateStatus();
+            return;
+          }
 
-        // collect data
+          const res = await sendPayload(data);
+          if(res && res.ok){
+            showMessage('ok', '✅ Response saved to the spreadsheet! Thank you.');
+            form.reset();
+            try{ window.confetti && window.confetti({particleCount:80,spread:120}); }catch(e){}
+            document.querySelector('.card').classList.add('celebrate');
+            setTimeout(()=>document.querySelector('.card').classList.remove('celebrate'),900);
+            flushQueue().catch(()=>{});
+          }else{
+            enqueue(data);
+            showMessage('err', 'Server returned an error — response queued and will be retried later.');
+          }
+        }catch(err){
+          enqueue(data);
+          showMessage('err', 'Network or server error — response queued for retry.');
+        }finally{
+          submitBtn.disabled = false; submitBtn.textContent = 'Send';
+          updateStatus();
+        }
+      }
+
+      // modal / payment orchestration
+      const requirePaymentEl = document.getElementById('requirePayment');
+      const cashModal = document.getElementById('cashModal');
+      const modalQr = document.getElementById('modalQr');
+      const modalLink = document.getElementById('modalLink');
+      const iPaidBtn = document.getElementById('iPaidBtn');
+      const cancelPay = document.getElementById('cancelPay');
+
+      // populate modal links (mirrors the section qr/link)
+      try{
+        const cashtag = '$brandon314314';
+        const cashUrl = `https://cash.app/$${encodeURIComponent(cashtag.replace('$',''))}`;
+        const qrData = encodeURIComponent(cashUrl);
+        const qrSrc = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${qrData}&chld=L|1`;
+        if(modalLink) modalLink.href = cashUrl;
+        if(modalQr) modalQr.src = qrSrc;
+      }catch(e){ }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        // collect data (same as before)
         const data = {
           fio: document.getElementById('fio').value.trim(),
           topic: document.getElementById('topic').value.trim(),
@@ -243,48 +311,37 @@
           q4: document.getElementById('q4').value,
           q5: Array.from(document.querySelectorAll('input[name="q5"]:checked')).map(el=>el.value)
         };
-
         // basic validation
         if(!data.fio || !data.topic || !data.q1 || !data.q2 || !data.q3 || !data.q4){
           showMessage('err', 'Please fill in all required fields.');
-          submitBtn.disabled = false; submitBtn.textContent = 'Send';
           return;
         }
 
-        // optimistic try to send
-        try{
-          if(!navigator.onLine){
-            enqueue(data);
-            showMessage('ok', 'Offline — your response has been saved and will be sent when connection is restored.');
-            form.reset();
-            updateStatus();
-            submitBtn.disabled = false; submitBtn.textContent = 'Send';
-            return;
-          }
+        // if user requested a payment requirement, show the modal and wait for confirmation
+        if(requirePaymentEl && requirePaymentEl.checked){
+          // show modal; when user confirms, proceed to sendData
+          cashModal.classList.add('active');
 
-          const res = await sendPayload(data);
-          if(res.ok){
-        showMessage('ok', '✅ Response saved to the spreadsheet! Thank you.');
-        form.reset();
-        // celebration: confetti + pulse
-        try{ window.confetti && window.confetti({particleCount:80,spread:120}); }catch(e){}
-        document.querySelector('.card').classList.add('celebrate');
-        setTimeout(()=>document.querySelector('.card').classList.remove('celebrate'),900);
-            // after success try to flush any queued items
-            flushQueue().catch(()=>{});
-          }else{
-            // server returned error — enqueue
-            enqueue(data);
-            showMessage('err', 'Server returned an error — response queued and will be retried later.');
-          }
-        }catch(err){
-          // network or timeout
-          enqueue(data);
-          showMessage('err', 'Network or server error — response queued for retry.');
+          const onConfirm = ()=>{
+            cashModal.classList.remove('active');
+            iPaidBtn.removeEventListener('click', onConfirm);
+            cancelPay.removeEventListener('click', onCancel);
+            sendData(data);
+          };
+          const onCancel = ()=>{
+            cashModal.classList.remove('active');
+            iPaidBtn.removeEventListener('click', onConfirm);
+            cancelPay.removeEventListener('click', onCancel);
+            showMessage('err', 'Payment required but cancelled. Submission not sent.');
+          };
+
+          iPaidBtn.addEventListener('click', onConfirm);
+          cancelPay.addEventListener('click', onCancel);
+          return;
         }
 
-  submitBtn.disabled = false; submitBtn.textContent = 'Send';
-        updateStatus();
+        // otherwise, proceed immediately
+        sendData(data);
       });
 
       // initial status and attempt to flush on load
