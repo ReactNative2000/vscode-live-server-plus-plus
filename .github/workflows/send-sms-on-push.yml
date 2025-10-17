@@ -1,0 +1,38 @@
+name: Send SMS on job file push
+
+on:
+  push:
+    paths:
+      - 'docs/job_example.txt'
+      - 'docs/jobs/**'
+
+jobs:
+  send_sms:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read job file
+        id: job
+        run: |
+          FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E 'docs/job_example.txt|docs/jobs/' | head -n1 || true)
+          if [ -z "$FILE" ]; then FILE=docs/job_example.txt; fi
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+
+      - name: Send SMS via Twilio
+        if: ${{ secrets.TWILIO_ACCOUNT_SID && secrets.TWILIO_AUTH_TOKEN && secrets.TWILIO_FROM && secrets.TWILIO_TO }}
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+          TWILIO_TO: ${{ secrets.TWILIO_TO }}
+        run: |
+          FILE="${{ steps.job.outputs.file }}"
+          echo "Sending $FILE to $TWILIO_TO"
+          BODY=$(sed -n '1,2000p' "$FILE" | sed 's/"/\"/g')
+          curl -s -X POST "https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json" \
+            -u "${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}" \
+            --data-urlencode "From=${TWILIO_FROM}" \
+            --data-urlencode "To=${TWILIO_TO}" \
+            --data-urlencode "Body=${BODY}" | jq .

@@ -52,6 +52,41 @@ if(!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM){
 const client = (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) ? require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN) : null;
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const stripe = STRIPE_SECRET ? require('stripe')(STRIPE_SECRET) : null;
+const nodemailer = require('nodemailer');
+
+// Optional Sentry for error reporting (set SENTRY_DSN in env to enable)
+let sentry = null;
+if(process.env.SENTRY_DSN){
+  try{
+    const Sentry = require('@sentry/node');
+    Sentry.init({ dsn: process.env.SENTRY_DSN });
+    sentry = Sentry;
+    console.log('Sentry initialized');
+  }catch(e){ console.warn('Sentry not installed or failed to initialize', e && e.message); }
+}
+
+// Health endpoint: checks server and DB connectivity
+app.get('/health', (req, res) => {
+  // check DB
+  db.get('SELECT 1 AS ok', [], (err) => {
+    if(err) return res.status(500).json({ ok: false, db: false, error: err.message });
+    res.json({ ok: true, db: true, uptime: process.uptime() });
+  });
+});
+
+// Simple metrics endpoint
+app.get('/metrics', (req, res) => {
+  db.get('SELECT COUNT(*) as payments FROM payments', [], (err,row) => {
+    const payments = (row && row.payments) ? row.payments : (row && row['COUNT(*)']) ? row['COUNT(*)'] : 0;
+    res.json({ uptime: process.uptime(), payments: payments });
+  });
+});
+
+// setup a nodemailer transporter if SMTP env vars are present (optional)
+let mailer = null;
+if(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS){
+  mailer = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: parseInt(process.env.SMTP_PORT||587,10), secure: process.env.SMTP_SECURE === '1', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
+}
 
 // POST /send { to: "+1314..", path: "docs/job_example.txt" }
 app.post('/send', async (req, res) => {
@@ -131,15 +166,29 @@ app.post('/admin/applications/:id/approve', (req, res) => {
 
 // Simple token-based admin auth middleware
 function requireAdmin(req,res,next){
-  // Support ADMIN_TOKEN or Basic auth (ADMIN_USER/ADMIN_PASS)
-  const token = req.headers['x-admin-token'] || req.query.admin_token || '';
-  if(token && process.env.ADMIN_TOKEN && token === process.env.ADMIN_TOKEN) return next();
+  // Prefer Authorization header (Bearer token or Basic). Keep x-admin-token and query param as legacy fallbacks.
+  const authHeader = (req.headers.authorization || '');
+  // Bearer token
+  if(authHeader.startsWith('Bearer ') && process.env.ADMIN_TOKEN){
+    const t = authHeader.slice(7).trim();
+    if(t && t === process.env.ADMIN_TOKEN) return next();
+  }
   // Basic auth
-  const auth = (req.headers.authorization || '');
-  if(auth.startsWith('Basic ') && process.env.ADMIN_USER && process.env.ADMIN_PASS){
-    const b = Buffer.from(auth.split(' ')[1],'base64').toString();
-    const [u,p] = b.split(':');
-    if(u === process.env.ADMIN_USER && p === process.env.ADMIN_PASS) return next();
+  if(authHeader.startsWith('Basic ') && process.env.ADMIN_USER && process.env.ADMIN_PASS){
+    try{
+      const b = Buffer.from(authHeader.split(' ')[1],'base64').toString();
+      const [u,p] = b.split(':');
+      if(u === process.env.ADMIN_USER && p === process.env.ADMIN_PASS) return next();
+    }catch(e){ /* ignore */ }
+  }
+  // legacy header
+  const legacyX = req.headers['x-admin-token'];
+  if(legacyX && process.env.ADMIN_TOKEN && legacyX === process.env.ADMIN_TOKEN) return next();
+  // legacy query param (still supported but discouraged)
+  const legacyQ = req.query.admin_token || '';
+  if(legacyQ && process.env.ADMIN_TOKEN && legacyQ === process.env.ADMIN_TOKEN){
+    console.warn('Using admin token via query string; consider switching to Authorization: Bearer <token>');
+    return next();
   }
   return res.status(401).json({ error: 'admin auth required' });
 }
@@ -172,6 +221,23 @@ app.get('/admin/payments', requireAdmin, (req,res)=>{
     if(err) return res.status(500).json({ error: err.message });
     res.json({ payments: rows });
   });
+});
+
+// POST /admin/reconcile { payment_id, application_id }
+app.post('/admin/reconcile', requireAdmin, (req,res)=>{
+  try{
+    const { payment_id, application_id } = req.body || {};
+    if(!payment_id || !application_id) return res.status(400).json({ error: 'payment_id and application_id required' });
+    // find member for application
+    db.get('SELECT id FROM members WHERE application_id = ? LIMIT 1', [application_id], (err,mrow)=>{
+      if(err) return res.status(500).json({ error: err.message });
+      const memberId = (mrow && mrow.id) ? mrow.id : null;
+      db.run('UPDATE payments SET member_id = ? WHERE id = ?', [memberId, payment_id], function(e2){
+        if(e2) return res.status(500).json({ error: e2.message });
+        return res.json({ ok: true, changes: this.changes });
+      });
+    });
+  }catch(err){ console.error(err); res.status(500).json({ error: err.message }); }
 });
 
 // Admin: migrate payments from payments.json into payments table
@@ -399,17 +465,22 @@ app.post('/admin/record-cashapp', requireAdmin, (req,res)=>{
 app.post('/create-checkout', async (req, res) => {
   if(!stripe) return res.status(500).json({ error: 'Stripe not configured (set STRIPE_SECRET)' });
   try{
-    const { amount, currency } = req.body;
+    const { amount, currency, application_id, customer_email } = req.body || {};
     const amt = parseInt(amount, 10) || 500; // default 5.00
     const cur = (currency || 'USD').toUpperCase();
+    const metadata = {};
+    if(application_id) metadata.application_id = String(application_id);
+    if(customer_email) metadata.customer_email = String(customer_email);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: [{ price_data: { currency: cur, product_data: { name: 'Support / Donation' }, unit_amount: amt }, quantity: 1 }],
       success_url: req.headers.origin + '/docs/reflection_form_improved.html?checkout=success',
-      cancel_url: req.headers.origin + '/docs/reflection_form_improved.html?checkout=cancel'
+      cancel_url: req.headers.origin + '/docs/reflection_form_improved.html?checkout=cancel',
+      metadata
     });
-    res.json({ url: session.url });
+    res.json({ url: session.url, id: session.id });
   }catch(err){ console.error(err); res.status(500).json({ error: err.message }); }
 });
 
@@ -434,20 +505,44 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
     // Handle checkout.session.completed
     if(event && event.type === 'checkout.session.completed'){
       const session = event.data.object;
-      const record = {
-        id: session.id,
-        amount_total: session.amount_total || null,
-        currency: session.currency || null,
-        customer: session.customer || null,
-        metadata: session.metadata || {},
-        created: Date.now()
+      const metadata = session.metadata || {};
+      const stripeId = session.id;
+      const amount = session.amount_total || null;
+      const currency = session.currency || null;
+      const email = metadata.customer_email || session.customer_details && session.customer_details.email || null;
+      const applicationId = metadata.application_id ? parseInt(metadata.application_id,10) : null;
+      const createdAt = Date.now();
+
+      // Try to find a member by email
+      const insertPayment = (memberId)=>{
+        db.run('INSERT INTO payments (stripe_id,amount,currency,member_id,created) VALUES (?,?,?,?,?)',[stripeId,amount,currency,memberId,createdAt], function(err){
+          if(err){ console.error('Failed to persist payment', err && err.message); }
+          else console.log('Persisted payment', stripeId);
+          // Send email notification to admin if configured
+          try{
+            if(mailer && process.env.ADMIN_EMAIL){
+              const amountDisplay = amount ? (amount/100).toFixed(2) : 'unknown';
+              const html = `<p>Payment received: <strong>$${amountDisplay} ${currency||''}</strong></p><p>Stripe session: ${stripeId}</p><p>Member ID: ${memberId||'N/A'}</p>`;
+              mailer.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: process.env.ADMIN_EMAIL, subject: `Payment received: $${amountDisplay}`, html }).then(()=>console.log('Admin email sent')).catch(e=>console.error('Failed to send admin email', e && e.message));
+            }
+          }catch(e){ console.error('Email notify error', e && e.message); }
+        });
       };
-      const storeFile = path.resolve(__dirname, 'payments.json');
-      let arr = [];
-      try{ arr = JSON.parse(fs.readFileSync(storeFile, 'utf8') || '[]'); }catch(e){ arr = []; }
-      arr.push(record);
-      fs.writeFileSync(storeFile, JSON.stringify(arr, null, 2));
-      console.log('Recorded payment', record.id);
+
+      if(email){
+        db.get('SELECT id FROM members WHERE email = ? LIMIT 1', [email], (err,row)=>{
+          const memberId = (row && row.id) ? row.id : null;
+          insertPayment(memberId);
+        });
+      }else if(applicationId){
+        // find member by application -> member
+        db.get('SELECT m.id FROM members m WHERE m.application_id = ? LIMIT 1', [applicationId], (err,row)=>{
+          const memberId = (row && row.id) ? row.id : null;
+          insertPayment(memberId);
+        });
+      }else{
+        insertPayment(null);
+      }
 
       // Prepare notification message including Cash App link
       const cashLink = 'https://cash.app/$brandon314314';

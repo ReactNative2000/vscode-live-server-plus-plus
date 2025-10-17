@@ -79,6 +79,8 @@
     <form id="reflectionForm" aria-describedby="formHelp">
       <label for="fio">Student full name</label>
       <input type="text" id="fio" name="fio" autocomplete="name" required>
+  <label for="email">Email (optional)</label>
+  <input type="text" id="email" name="email" autocomplete="email" placeholder="you@example.com">
 
       <label for="topic">Lesson topic</label>
       <input type="text" id="topic" name="topic" required>
@@ -602,13 +604,33 @@
     (async ()=>{ const nav = (navigator.language||'en').slice(0,2); const pick = ['en','es'].includes(nav) ? nav : 'en'; document.getElementById('langSel').value = pick; const d = await loadLocale(pick); applyLocale(d); })();
 
     // Stripe Checkout: create a session via server and redirect (server endpoint must implement /create-checkout)
-    async function startCheckout(amountCents){
+    async function startCheckout(amountCents, applicationId, customerEmail){
+      // amountCents: integer (cents)
       try{
         const cur = document.getElementById('currencySel').value || 'USD';
-        const res = await fetch('/create-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount: amountCents, currency: cur }) });
+        const payload = { amount: amountCents, currency: cur };
+        if(applicationId) payload.application_id = String(applicationId);
+        if(customerEmail) payload.customer_email = String(customerEmail);
+        // include optional token/game token and name to make reconciliation easier
+        try{ payload.token = document.getElementById('gameToken').value || undefined; }catch(e){}
+        try{ payload.customer_name = document.getElementById('fio').value || undefined; }catch(e){}
+        const res = await fetch('/create-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         const j = await res.json();
-        if(j && j.url){ window.location = j.url; }
-      }catch(e){ alert('Checkout failed'); }
+        if(j && j.url){
+          // record the click (local + server) for analytics before redirect
+          try{ trackPaymentClick('stripe'); }catch(e){}
+          window.location = j.url;
+        } else {
+          alert('Checkout creation failed — please try again.');
+        }
+      }catch(e){ console.error(e); alert('Checkout failed — network or server error.'); }
+    }
+
+    // UX wrapper: read email and optionally generate an application id (token) and call startCheckout
+    async function startCheckoutFromForm(amountCents){
+      const email = (document.getElementById('email') || {}).value || '';
+      const appId = (document.getElementById('gameToken') || {}).value || '';
+      await startCheckout(amountCents, appId || undefined, email || undefined);
     }
   </script>
   <!-- confetti -->

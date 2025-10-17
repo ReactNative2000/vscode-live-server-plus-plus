@@ -33,7 +33,7 @@
   <script>
     function adminHeaders(){
       const token = document.getElementById('adminToken').value.trim();
-      return token ? { 'x-admin-token': token } : {};
+      return token ? { 'Authorization': 'Bearer ' + token } : {};
     }
     async function loadApps(){
       const res = await fetch('/admin/applications',{headers:adminHeaders()});
@@ -78,15 +78,19 @@
       const j = await res.json();
       if(j && j.ok) { alert('Recorded id: '+j.id); loadPayments(); } else alert('Error: '+JSON.stringify(j));
     }
-    function downloadMembers(){
-      const token = document.getElementById('adminToken').value.trim();
-      const url = '/admin/export/members.csv'+(token?('?admin_token='+encodeURIComponent(token)): '');
-      window.location = url;
+    async function downloadMembers(){
+      const headers = adminHeaders();
+      const res = await fetch('/admin/export/members.csv', { headers });
+      if(!res.ok) return alert('Failed to download members CSV');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'members.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
-    function downloadPayments(){
-      const token = document.getElementById('adminToken').value.trim();
-      const url = '/admin/export/payments.csv'+(token?('?admin_token='+encodeURIComponent(token)): '');
-      window.location = url;
+    async function downloadPayments(){
+      const headers = adminHeaders();
+      const res = await fetch('/admin/export/payments.csv', { headers });
+      if(!res.ok) return alert('Failed to download payments CSV');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'payments.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
     // Initial load attempts without admin token will show pending apps (public)
     loadApps();
