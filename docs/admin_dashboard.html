@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Applications</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#091423;color:#eef}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}</style>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <div>
+    <label>Admin token: <input id="adminToken" placeholder="paste admin token"></label>
+    <button onclick="loadApps()">Load Applications</button>
+    <button onclick="loadMembers()">Members</button>
+    <button onclick="loadPayments()">Payments</button>
+    <button onclick="migratePayments()">Migrate payments.json</button>
+    <button onclick="downloadMembers()">Download members CSV</button>
+    <button onclick="downloadPayments()">Download payments CSV</button>
+    <div style="margin-top:12px;padding:10px;background:#071012;border:1px solid rgba(255,255,255,0.03);">
+      <h3>Record manual Cash App payment</h3>
+      <label>Amount (cents): <input id="cash_amount" placeholder="120000"></label>
+      <label>Txn ID: <input id="cash_txn" placeholder="txn_abc123"></label>
+      <label>Payer email: <input id="cash_email" placeholder="payer@example.com"></label>
+      <label>Note: <input id="cash_note" placeholder="optional note"></label>
+      <button onclick="recordCashApp()">Record Cash App</button>
+    </div>
+  </div>
+  <h2>Pending applications</h2>
+  <table id="apps"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Created</th><th>Action</th></tr></thead><tbody></tbody></table>
+  <h2>Members</h2>
+  <table id="members"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Type</th><th>Joined</th></tr></thead><tbody></tbody></table>
+  <h2>Payments</h2>
+  <table id="payments"><thead><tr><th>ID</th><th>Stripe ID</th><th>Amount</th><th>Currency</th><th>Member ID</th><th>Created</th></tr></thead><tbody></tbody></table>
+  <script>
+    function adminHeaders(){
+      const token = document.getElementById('adminToken').value.trim();
+      return token ? { 'x-admin-token': token } : {};
+    }
+    async function loadApps(){
+      const res = await fetch('/admin/applications',{headers:adminHeaders()});
+      const j = await res.json();
+      const tbody = document.querySelector('#apps tbody');
+      tbody.innerHTML = '';
+      (j.applications||[]).forEach(a=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a.id}</td><td>${a.name}</td><td>${a.email}</td><td>${a.type}</td><td>${new Date(a.created).toLocaleString()}</td><td><button onclick="approve(${a.id},'approved')">Approve</button> <button onclick="approve(${a.id},'rejected')">Reject</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    async function approve(id,status){
+      const res = await fetch('/admin/applications/'+id+'/approve',{method:'POST',headers:Object.assign({'content-type':'application/json'},adminHeaders()),body:JSON.stringify({status})});
+      if(res.ok) loadApps(); else alert('Error');
+    }
+    async function loadMembers(){
+      const res = await fetch('/admin/members',{headers:adminHeaders()});
+      const j = await res.json();
+      const tbody = document.querySelector('#members tbody'); tbody.innerHTML='';
+      (j.members||[]).forEach(m=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${m.id}</td><td>${m.name}</td><td>${m.email}</td><td>${m.type}</td><td>${new Date(m.joined).toLocaleString()}</td>`; tbody.appendChild(tr); });
+    }
+    async function loadPayments(){
+      const res = await fetch('/admin/payments',{headers:adminHeaders()});
+      const j = await res.json();
+      const tbody = document.querySelector('#payments tbody'); tbody.innerHTML='';
+      (j.payments||[]).forEach(p=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${p.id}</td><td>${p.stripe_id}</td><td>${p.amount}</td><td>${p.currency}</td><td>${p.member_id}</td><td>${new Date(p.created).toLocaleString()}</td>`; tbody.appendChild(tr); });
+    }
+    async function migratePayments(){
+      const res = await fetch('/admin/migrate-payments',{method:'POST',headers:adminHeaders()});
+      const j = await res.json();
+      alert('Migration result: '+JSON.stringify(j));
+      loadPayments();
+    }
+    async function recordCashApp(){
+      const amount = document.getElementById('cash_amount').value.trim();
+      const txn = document.getElementById('cash_txn').value.trim();
+      const email = document.getElementById('cash_email').value.trim();
+      const note = document.getElementById('cash_note').value.trim();
+      if(!amount || !txn) return alert('amount and txn required');
+      const res = await fetch('/admin/record-cashapp',{method:'POST',headers:Object.assign({'content-type':'application/json'},adminHeaders()),body:JSON.stringify({amount:parseInt(amount,10),currency:'USD',txn_id:txn,payer_email:email,note})});
+      const j = await res.json();
+      if(j && j.ok) { alert('Recorded id: '+j.id); loadPayments(); } else alert('Error: '+JSON.stringify(j));
+    }
+    function downloadMembers(){
+      const token = document.getElementById('adminToken').value.trim();
+      const url = '/admin/export/members.csv'+(token?('?admin_token='+encodeURIComponent(token)): '');
+      window.location = url;
+    }
+    function downloadPayments(){
+      const token = document.getElementById('adminToken').value.trim();
+      const url = '/admin/export/payments.csv'+(token?('?admin_token='+encodeURIComponent(token)): '');
+      window.location = url;
+    }
+    // Initial load attempts without admin token will show pending apps (public)
+    loadApps();
+  </script>
+</body>
+</html>
