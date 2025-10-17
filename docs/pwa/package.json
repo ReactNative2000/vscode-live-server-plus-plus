@@ -1,0 +1,12 @@
+{
+  "name": "lspp-pwa-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Small tools to generate PWA icons for docs",
+  "scripts": {
+    "generate-icons": "node generate-icons.js"
+  },
+  "dependencies": {
+    "jimp": "^0.16.1"
+  }
+}
