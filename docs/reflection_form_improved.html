@@ -261,6 +261,19 @@
       // initial status and attempt to flush on load
       updateStatus();
       if(navigator.onLine) flushQueue().catch(()=>{});
+
+      // Payment QR/link generation
+      try{
+        const cashtag = '$brandon314314';
+        // Cash App deep link (works on mobile) and web link
+        const cashUrl = `https://cash.app/$${encodeURIComponent(cashtag.replace('$',''))}`;
+        const qrData = encodeURIComponent(cashUrl);
+        const qrSrc = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${qrData}&chld=L|1`;
+        const cashLinkEl = document.getElementById('cashLink');
+        const cashQrEl = document.getElementById('cashQr');
+        if(cashLinkEl){ cashLinkEl.href = cashUrl; cashLinkEl.textContent = `Pay ${cashtag} on Cash App`; }
+        if(cashQrEl) cashQrEl.src = qrSrc;
+      }catch(e){ /* ignore */ }
     })();
   </script>
 </body>
