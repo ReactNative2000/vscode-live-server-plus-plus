@@ -1,0 +1,15 @@
+{
+  "name": "Рефлексия урока",
+  "short_name": "Рефлексия",
+  "description": "Короткая форма для сбора рефлексии учеников",
+  "start_url": "/docs/reflection_form_improved.html",
+  "scope": "/docs/",
+  "display": "standalone",
+  "background_color": "#f9f9f9",
+  "theme_color": "#2b8a3e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}
