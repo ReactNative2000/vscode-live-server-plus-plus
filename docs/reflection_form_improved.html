@@ -66,6 +66,18 @@
       <label for="topic">Lesson topic</label>
       <input type="text" id="topic" name="topic" required>
 
+      <label for="game">Which game did you play?</label>
+      <select id="game" name="game">
+        <option value="">--None/Not applicable--</option>
+        <option value="Chess">Chess</option>
+        <option value="Checkers">Checkers</option>
+        <option value="Tic-Tac-Toe">Tic-Tac-Toe</option>
+        <option value="Memory">Memory / Matching</option>
+        <option value="Simon">Simon / Pattern</option>
+        <option value="Pong">Pong</option>
+        <option value="Other">Other</option>
+      </select>
+
       <label for="q1">1. What part of the lesson was clearest, and what remained unclear? ✍️</label>
       <textarea id="q1" name="q1" required></textarea>
 
@@ -189,6 +201,7 @@
         const params = new URLSearchParams();
         if(payload.fio) params.append('fio', payload.fio);
         if(payload.topic) params.append('topic', payload.topic);
+        if(payload.game) params.append('game', payload.game);
         if(payload.q1) params.append('q1', payload.q1);
         if(payload.q2) params.append('q2', payload.q2);
         if(payload.q3) params.append('q3', payload.q3);
