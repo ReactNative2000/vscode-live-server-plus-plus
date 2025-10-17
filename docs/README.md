@@ -30,3 +30,8 @@ Notes
 
 - The client performs basic validation client-side; it's still recommended to validate input on the server.
 - Queued submissions are stored under `localStorage` key `reflection_offline_queue_v1`. Clearing site storage will remove queued items.
+
+Payment (optional)
+
+- You can accept optional support payments via Cash App. Send payments to the cashtag: `$brandon314314`.
+- The form does not depend on payment — submissions are recorded regardless of payment. Reconcile payments manually against form responses (timestamp + fio/topic).
