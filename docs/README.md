@@ -35,3 +35,13 @@ Payment (optional)
 
 - You can accept optional support payments via Cash App. Send payments to the cashtag: `$brandon314314`.
 - The form does not depend on payment — submissions are recorded regardless of payment. Reconcile payments manually against form responses (timestamp + fio/topic).
+
+Admin reconciliation UI
+
+- A lightweight reconciliation UI is available at `docs/admin_reconcile.html`.
+- Usage:
+   1. Export form responses from Google Sheets as CSV and upload via the CSV uploader, or paste a JSON array of responses.
+   2. Mark rows as paid, record amount and transaction id, and save locally or download reconciliation CSV.
+   3. Optionally enter an Apps Script endpoint to POST reconciliation rows remotely.
+
+Note: This tool stores reconciliation locally in the browser by default (localStorage). For team-wide reconciliation, provide an Apps Script endpoint that accepts reconciliation POSTs and saves them to a shared sheet.
