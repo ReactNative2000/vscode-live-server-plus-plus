@@ -18,7 +18,7 @@ cp -r ../reflection_form_improved.html ../icons ../manifest.webmanifest www/
 
 ```bash
 npm install @capacitor/core @capacitor/cli --save
-npx cap init lspp-app com.example.lspp "Live Server PWA"
+npx cap init lspp-app com.example.lspp "ReactNative2000"
 # If your web assets are in `www/` and you're in the project root, ensure capacitor.config.json has "webDir": "www"
 npx cap add ios
 npx cap open ios

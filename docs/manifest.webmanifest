@@ -1,7 +1,7 @@
 {
-  "name": "Рефлексия урока",
-  "short_name": "Рефлексия",
-  "description": "Короткая форма для сбора рефлексии учеников",
+  "name": "ReactNative2000",
+  "short_name": "ReactNative2000",
+  "description": "Reflection form and PWA for ReactNative2000",
   "start_url": "/docs/reflection_form_improved.html",
   "scope": "/docs/",
   "display": "standalone",

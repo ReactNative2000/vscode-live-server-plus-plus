@@ -24,7 +24,7 @@ High-level steps for Capacitor:
 
 ```bash
 npm install @capacitor/core @capacitor/cli --save
-npx cap init lspp-app com.example.lspp "Live Server PWA"
+npx cap init lspp-app com.example.lspp "ReactNative2000"
 # Make sure your built site is in `www/` or change capacitor.config.json
 npx cap add ios
 npx cap open ios
