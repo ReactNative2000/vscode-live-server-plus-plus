@@ -42,6 +42,10 @@
 
 [Click here to read settings Docs](./docs/settings.md).
 
+## Reflection form (docs)
+
+An improved student reflection form is available in the `docs/` folder: [docs/reflection_form_improved.html](./docs/reflection_form_improved.html). See `docs/README.md` for endpoint expectations and local testing instructions.
+
 ## What's new ?
 
 - ### v0.0.1 (##DATE##)
