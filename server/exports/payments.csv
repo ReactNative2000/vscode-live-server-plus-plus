@@ -1,0 +1,4 @@
+id,stripe_id,amount,currency,member_id,created
+10,cs_auto_1,2500,USD,,1760741551304
+7,cs_test_2,1200,USD,,1760740886934
+8,cs_test_1,500,USD,,1760740886934

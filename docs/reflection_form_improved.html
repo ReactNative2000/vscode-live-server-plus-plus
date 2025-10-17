@@ -89,6 +89,9 @@
       <label for="q1">1. What part of the lesson was clearest, and what remained unclear? ✍️</label>
       <textarea id="q1" name="q1" required></textarea>
 
+  <label for="whatsOnMind">What's on your mind?</label>
+  <textarea id="whatsOnMind" name="whatsOnMind" placeholder="Share a quick thought (optional)"></textarea>
+
       <label for="q2">2. At which moment did you get stuck or distracted? 🧐</label>
       <textarea id="q2" name="q2" required></textarea>
 
@@ -129,19 +132,46 @@
   <label style="font-weight:600;">Payment (optional)</label>
   <p class="small">If you'd like to support the author, you can pay via Cash App:</p>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-          <a id="cashLink" class="small" href="#" target="_blank" rel="noopener">Pay $brandon314314 on Cash App</a>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <a id="cashLink" class="small" href="#" target="_blank" rel="noopener">Pay $brandon314314 on Cash App</a>
+            <a id="paypalLink" class="small" href="#" target="_blank" rel="noopener" style="color:#003087">Pay via PayPal.me</a>
+            <a id="venmoLink" class="small" href="#" target="_blank" rel="noopener" style="color:#3d95ce">Pay via Venmo</a>
+          </div>
           <div id="qrWrap" style="width:110px;height:110px;background:#fff;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #eee">
             <img id="cashQr" alt="Cash App QR" style="max-width:100%;max-height:100%" src="" />
           </div>
         </div>
-        <label style="display:block;margin-top:10px"><input type="checkbox" id="requirePayment"> Require payment before submitting (opens Cash App)</label>
-        <p class="small">After payment, please mark the payment in your records — form submission is independent and will be sent regardless of payment.</p>
+        <label style="display:block;margin-top:10px"><input type="checkbox" id="requirePayment"> Require payment before submitting (opens payment provider)</label>
+        <p class="small">After payment, please mark the payment in your records — form submission is independent and will be sent regardless of payment. <strong>Please include your name and the game token in the payment note/memo</strong> to make reconciliation easier.</p>
       </section>
 
+      <div style="margin-top:12px;">
+        <button id="showQueueBtn" type="button" class="btn" style="background:linear-gradient(90deg,#6b8bff,#9f6bff);">Show queued responses</button>
+      </div>
+
       <div id="feedback" aria-live="polite"></div>
+      <p class="small">Want to chat with other students or leave a quick note? Use the chat button (bottom-right).</p>
       <p id="formHelp" class="small">Responses are saved via Google Apps Script. If there's a problem, try again later — the browser will retry automatically.</p>
     </form>
   </main>
+
+  <!-- Chat widget -->
+  <div id="chatBtn" style="position:fixed;right:18px;bottom:18px;z-index:1400">
+    <button id="openChat" class="btn" style="border-radius:50%;width:56px;height:56px;padding:10px">💬</button>
+  </div>
+  <div id="chatModal" class="modal" aria-hidden="true" style="display:none;align-items:flex-end;justify-content:flex-end;">
+    <div class="box" style="width:320px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;padding:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong>Chat</strong>
+        <button id="closeChat" class="btn" style="padding:6px;border-radius:8px;background:#eee;color:#222">Close</button>
+      </div>
+      <div id="chatList" style="flex:1;overflow:auto;padding:8px;border-radius:8px;border:1px solid #f0f0f0;background:#fff"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="chatInput" placeholder="Say something..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6edf2" />
+        <button id="sendChat" class="btn">Send</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Cash App modal -->
   <div id="cashModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cashModalTitle">
@@ -158,6 +188,56 @@
   </div>
 
   <script>
+  // Chat widget: lightweight localStorage-backed chat and integration with form sends
+  (function(){
+    const CHAT_KEY = 'lspp_chat_v1';
+    const chatBtn = document.getElementById('openChat');
+    const chatModal = document.getElementById('chatModal');
+    const closeChat = document.getElementById('closeChat');
+    const chatList = document.getElementById('chatList');
+    const chatInput = document.getElementById('chatInput');
+    const sendChat = document.getElementById('sendChat');
+
+    function loadChat(){
+      try{
+        const raw = localStorage.getItem(CHAT_KEY) || '[]';
+        return JSON.parse(raw);
+      }catch(e){return []}
+    }
+    function saveChat(arr){ localStorage.setItem(CHAT_KEY, JSON.stringify(arr)); }
+    function renderChat(){
+      const items = loadChat();
+      chatList.innerHTML = items.map(it=>`<div style="margin-bottom:8px"><small style="color:#666">${escapeHtml(new Date(it.t).toLocaleTimeString())}</small><div>${escapeHtml(it.text)}</div></div>`).join('');
+      chatList.scrollTop = chatList.scrollHeight;
+    }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    chatBtn.addEventListener('click',()=>{ chatModal.style.display='flex'; chatModal.setAttribute('aria-hidden','false'); renderChat(); chatInput.focus(); });
+    closeChat.addEventListener('click',()=>{ chatModal.style.display='none'; chatModal.setAttribute('aria-hidden','true'); });
+    sendChat.addEventListener('click', ()=>{ sendCurrentChat(); });
+    chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCurrentChat(); } });
+
+    function sendCurrentChat(){
+      const txt = (chatInput.value || '').trim();
+      if(!txt) return;
+      const arr = loadChat();
+      const item = { t: Date.now(), text: txt };
+      arr.push(item);
+      saveChat(arr);
+      renderChat();
+      chatInput.value='';
+      // post to endpoint as type=chat — non-blocking
+      if(typeof sendPayload === 'function'){
+        sendPayload({ type: 'chat', chat: item }).catch(()=>{/*ignore*/});
+      }
+    }
+
+    // Expose a method to include recent chat with form submits
+    window.__lspp_getRecentChat = function(limit=5){
+      try{ const arr = loadChat(); return arr.slice(-limit); }catch(e){return []}
+    }
+  })();
+
     (function(){
       const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwELGti1O-UzG5fhGf0IYJY-wZ1wzYmxGO4aGgi9WpzwO0Wr_SjGIc-68MHY72kUmJ7rA/exec';
       const form = document.getElementById('reflectionForm');
@@ -211,6 +291,8 @@
         if(payload.topic) params.append('topic', payload.topic);
         if(payload.game) params.append('game', payload.game);
     if(payload.token) params.append('token', payload.token);
+        if(payload.whatsOnMind) params.append('whatsOnMind', payload.whatsOnMind);
+        if(payload.chat && Array.isArray(payload.chat)) params.append('chat', JSON.stringify(payload.chat));
         if(payload.q1) params.append('q1', payload.q1);
         if(payload.q2) params.append('q2', payload.q2);
         if(payload.q3) params.append('q3', payload.q3);
@@ -355,12 +437,15 @@
           fio: document.getElementById('fio').value.trim(),
           topic: document.getElementById('topic').value.trim(),
           token: document.getElementById('gameToken').value.trim(),
+          whatsOnMind: document.getElementById('whatsOnMind').value.trim(),
           q1: document.getElementById('q1').value.trim(),
           q2: document.getElementById('q2').value.trim(),
           q3: document.getElementById('q3').value,
           q4: document.getElementById('q4').value,
           q5: Array.from(document.querySelectorAll('input[name="q5"]:checked')).map(el=>el.value)
         };
+        // attach recent chat (non-blocking)
+        try{ data.chat = (typeof window.__lspp_getRecentChat === 'function') ? window.__lspp_getRecentChat(10) : []; }catch(e){ data.chat = []; }
         // basic validation
         if(!data.fio || !data.topic || !data.q1 || !data.q2 || !data.q3 || !data.q4){
           showMessage('err', 'Please fill in all required fields.');
@@ -409,7 +494,26 @@
         const cashQrEl = document.getElementById('cashQr');
         if(cashLinkEl){ cashLinkEl.href = cashUrl; cashLinkEl.textContent = `Pay ${cashtag} on Cash App`; }
         if(cashQrEl) cashQrEl.src = qrSrc;
+        // PayPal.me and Venmo links (replace YOUR_PAYPAL_NAME with your PayPal.me id)
+        const paypalMe = 'brandon314314'; // change this to your PayPal.me id if different
+        const venmoHandle = 'brandon314314'; // change to your Venmo username if desired
+        const paypalLinkEl = document.getElementById('paypalLink');
+        const venmoLinkEl = document.getElementById('venmoLink');
+        if(paypalLinkEl){ paypalLinkEl.href = `https://paypal.me/${encodeURIComponent(paypalMe)}`; paypalLinkEl.textContent = `Pay via PayPal.me (${paypalMe})`; }
+        if(venmoLinkEl){ venmoLinkEl.href = `https://venmo.com/${encodeURIComponent(venmoHandle)}`; venmoLinkEl.textContent = `Pay via Venmo (${venmoHandle})`; }
       }catch(e){ /* ignore */ }
+
+      // queued responses UI
+      const showQueueBtn = document.getElementById('showQueueBtn');
+      function renderQueue(){
+        const q = loadQueue();
+        if(!q.length) return alert('No queued responses');
+        const list = q.map((it, idx) => `${idx+1}. ${it.data.fio || '—'} | ${new Date(it.ts).toLocaleString()} | ${it.data.topic || ''}`).join('\n');
+        if(confirm(list + '\n\nWould you like to retry sending queued items now?')){
+          flushQueue().then(()=>{ alert('Retry attempted — check status text for remaining queue.'); }).catch(()=>{ alert('Retry failed — will try again later.'); });
+        }
+      }
+      showQueueBtn && showQueueBtn.addEventListener('click', renderQueue);
     })();
   </script>
   <!-- confetti -->
