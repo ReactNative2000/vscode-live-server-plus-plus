@@ -1,9 +1,23 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Рефлексия урока — форма</title>
+  <title>Lesson Reflection — Form</title>
+  <!-- PWA / iOS meta -->
+  <link rel="manifest" href="/docs/manifest.webmanifest">
+  <meta name="theme-color" content="#2b8a3e">
+  <!-- Apple splash / icons -->
+  <link rel="apple-touch-icon" href="/docs/icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/docs/icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/docs/icons/icon-167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- iOS splash screens (recommended to generate for a polished look) -->
+  <link rel="apple-touch-startup-image" href="/docs/icons/apple-splash-1125x2436.png" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)">
+  <link rel="apple-touch-startup-image" href="/docs/icons/apple-splash-1242x2688.png" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)">
+  <link rel="apple-touch-startup-image" href="/docs/icons/apple-splash-828x1792.png" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)">
   <style>
     :root{--bg:#f9f9f9;--card:#fff;--accent:#2b8a3e;--muted:#666}
     body{font-family:Inter, Arial, Helvetica, sans-serif;margin:24px;background:var(--bg);color:#222}
@@ -25,69 +39,69 @@
 </head>
 <body>
   <main class="card" role="main">
-    <h1>Рефлексия по уроку</h1>
-    <p class="lead">Заполни короткую форму — ответы сохранятся в таблицу. Если пропадёт связь, мы попробуем отправить автоматически, когда соединение восстановится.</p>
+  <h1>Lesson Reflection</h1>
+  <p class="lead">Fill in this short reflection — responses will be saved to a spreadsheet. If your connection drops, the browser will retry automatically when it's restored.</p>
 
     <form id="reflectionForm" aria-describedby="formHelp">
-      <label for="fio">ФИО ученика</label>
+      <label for="fio">Student full name</label>
       <input type="text" id="fio" name="fio" autocomplete="name" required>
 
-      <label for="topic">Тема урока</label>
+      <label for="topic">Lesson topic</label>
       <input type="text" id="topic" name="topic" required>
 
-      <label for="q1">1. Что на уроке было самым понятным, а что осталось туманным? ✍️</label>
+      <label for="q1">1. What part of the lesson was clearest, and what remained unclear? ✍️</label>
       <textarea id="q1" name="q1" required></textarea>
 
-      <label for="q2">2. На каком моменте урока ты залип? 🧐</label>
+      <label for="q2">2. At which moment did you get stuck or distracted? 🧐</label>
       <textarea id="q2" name="q2" required></textarea>
 
-      <label for="q3">3. Оцени урок по шкале от 1 до 5 ⭐</label>
+      <label for="q3">3. Rate the lesson from 1 to 5 ⭐</label>
       <select id="q3" name="q3" required>
-        <option value="">--Выбери--</option>
-        <option value="1">1 - совсем не понял</option>
+        <option value="">--Select--</option>
+        <option value="1">1 - didn't understand at all</option>
         <option value="2">2</option>
-        <option value="3">3 - нормально</option>
+        <option value="3">3 - okay</option>
         <option value="4">4</option>
-        <option value="5">5 - супер!</option>
+        <option value="5">5 - great!</option>
       </select>
 
-      <label for="q4">4. С каким настроением уходишь? 😊😐😢🤩</label>
+      <label for="q4">4. How do you feel leaving the lesson? 😊😐😢🤩</label>
       <select id="q4" name="q4" required>
-        <option value="">--Выбери смайлик--</option>
-        <option value="😊">😊 Радость</option>
-        <option value="😐">😐 Спокойствие</option>
-        <option value="😢">😢 Грусть</option>
-        <option value="🤩">🤩 Восторг</option>
+        <option value="">--Choose--</option>
+        <option value="😊">😊 Happy</option>
+        <option value="😐">😐 Neutral</option>
+        <option value="😢">😢 Sad</option>
+        <option value="🤩">🤩 Excited</option>
       </select>
 
-      <label>5. Что можно улучшить в уроке? (несколько вариантов)</label>
+      <label>5. What could be improved in the lesson? (multiple)</label>
       <div class="checkbox-group" role="group" aria-label="Что можно улучшить">
-        <label><input type="checkbox" name="q5" value="Больше примеров"> Больше примеров</label>
-        <label><input type="checkbox" name="q5" value="Интерактив"> Интерактив</label>
-        <label><input type="checkbox" name="q5" value="Темп помедленнее"> Темп помедленнее</label>
-        <label><input type="checkbox" name="q5" value="Темп побыстрее"> Темп побыстрее</label>
-        <label><input type="checkbox" name="q5" value="Больше картинок/видео"> Больше картинок/видео</label>
+  <label><input type="checkbox" name="q5" value="More examples"> More examples</label>
+  <label><input type="checkbox" name="q5" value="More interaction"> More interaction</label>
+  <label><input type="checkbox" name="q5" value="Slower pace"> Slower pace</label>
+  <label><input type="checkbox" name="q5" value="Faster pace"> Faster pace</label>
+  <label><input type="checkbox" name="q5" value="More images/videos"> More images/videos</label>
       </div>
 
       <div class="controls">
-        <button id="submitBtn" type="submit">Отправить</button>
+        <button id="submitBtn" type="submit">Send</button>
         <div class="small" id="statusText">&nbsp;</div>
       </div>
 
       <section aria-label="Payment" style="margin-top:14px;border-top:1px solid #eee;padding-top:12px;">
-        <label style="font-weight:600;">Оплата (необязательно)</label>
-        <p class="small">Если вы хотите поддержать автора, можно оплатить через Cash App:</p>
+  <label style="font-weight:600;">Payment (optional)</label>
+  <p class="small">If you'd like to support the author, you can pay via Cash App:</p>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
           <a id="cashLink" class="small" href="#" target="_blank" rel="noopener">Pay $brandon314314 on Cash App</a>
           <div id="qrWrap" style="width:110px;height:110px;background:#fff;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #eee">
             <img id="cashQr" alt="Cash App QR" style="max-width:100%;max-height:100%" src="" />
           </div>
         </div>
-        <p class="small">После оплаты, пожалуйста, отметьте платёж в вашей системе — отправка формы не зависит от платежа и будет отправлена независимо.</p>
+        <p class="small">After payment, please mark the payment in your records — form submission is independent and will be sent regardless of payment.</p>
       </section>
 
       <div id="feedback" aria-live="polite"></div>
-      <p id="formHelp" class="small">Ответы сохраняются через Google Apps Script. В случае проблем попробуйте позже — браузер попытается отправить автоматически.</p>
+      <p id="formHelp" class="small">Responses are saved via Google Apps Script. If there's a problem, try again later — the browser will retry automatically.</p>
     </form>
   </main>
 
@@ -128,7 +142,7 @@
       function updateStatus(){
         const q = loadQueue();
         if(q.length) statusText.textContent = `В очереди на отправку: ${q.length}`;
-        else statusText.textContent = navigator.onLine ? 'Готово' : 'Оффлайн — ответы будут отправлены при подключении';
+  else statusText.textContent = navigator.onLine ? 'Ready' : 'Offline — responses will be sent when connection returns';
       }
 
       // helper: timeout for fetch
@@ -221,8 +235,8 @@
 
         // basic validation
         if(!data.fio || !data.topic || !data.q1 || !data.q2 || !data.q3 || !data.q4){
-          showMessage('err', 'Пожалуйста, заполните все обязательные поля.');
-          submitBtn.disabled = false; submitBtn.textContent = 'Отправить';
+          showMessage('err', 'Please fill in all required fields.');
+          submitBtn.disabled = false; submitBtn.textContent = 'Send';
           return;
         }
 
@@ -230,31 +244,31 @@
         try{
           if(!navigator.onLine){
             enqueue(data);
-            showMessage('ok', 'Сеть отсутствует — ответ сохранён и будет отправлен при подключении.');
+            showMessage('ok', 'Offline — your response has been saved and will be sent when connection is restored.');
             form.reset();
             updateStatus();
-            submitBtn.disabled = false; submitBtn.textContent = 'Отправить';
+            submitBtn.disabled = false; submitBtn.textContent = 'Send';
             return;
           }
 
           const res = await sendPayload(data);
           if(res.ok){
-            showMessage('ok', '✅ Ответ сохранён в таблице! Спасибо.');
+            showMessage('ok', '✅ Response saved to the spreadsheet! Thank you.');
             form.reset();
             // after success try to flush any queued items
             flushQueue().catch(()=>{});
           }else{
             // server returned error — enqueue
             enqueue(data);
-            showMessage('err', 'Сервер вернул ошибку — ответ помещён в очередь и будет отправлен позже.');
+            showMessage('err', 'Server returned an error — response queued and will be retried later.');
           }
         }catch(err){
           // network or timeout
           enqueue(data);
-          showMessage('err', 'Проблемы с сетью или сервером — ответ помещён в очередь.');
+          showMessage('err', 'Network or server error — response queued for retry.');
         }
 
-        submitBtn.disabled = false; submitBtn.textContent = 'Отправить';
+  submitBtn.disabled = false; submitBtn.textContent = 'Send';
         updateStatus();
       });
 
@@ -274,6 +288,22 @@
         if(cashLinkEl){ cashLinkEl.href = cashUrl; cashLinkEl.textContent = `Pay ${cashtag} on Cash App`; }
         if(cashQrEl) cashQrEl.src = qrSrc;
       }catch(e){ /* ignore */ }
+    })();
+  </script>
+  <script>
+    // Register service worker for offline capability and PWA install
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/docs/sw.js').then(reg => {
+        // console.log('SW registered', reg);
+      }).catch(err => {
+        // console.warn('SW registration failed', err);
+      });
+    }
+    // iOS users: show a tiny hint when in standalone mode
+    (function(){
+      if(window.navigator.standalone === false){
+        // Not in standalone - you can prompt users to Add to Home Screen manually if you want
+      }
     })();
   </script>
 </body>
