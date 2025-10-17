@@ -1,11 +1,11 @@
 # Supabase chat wiring (example)
 
-This document explains a simple way to wire the local chat widget to Supabase Realtime (or the Realtime extension) so messages can be synced across clients.
+This document explains a simple way to wire the local chat widget to Supabase Realtime so messages can be synced across clients.
 
 Requirements
 
 1. A Supabase project.
-2. A table to store messages. Example schema:
+1. A table to store messages. Example schema:
 
 ```sql
 create table messages (
@@ -24,7 +24,7 @@ Client example (JavaScript)
 npm install @supabase/supabase-js
 ```
 
-2. Initialize and subscribe to new messages:
+1. Initialize and subscribe to new messages:
 
 ```javascript
 import { createClient } from '@supabase/supabase-js'
@@ -53,66 +53,8 @@ Notes
 - Use Row Level Security (RLS) and policies to restrict who may insert messages in a production app.
 - The example uses the public anon key to receive realtime updates; writes can be restricted via RLS and authenticated requests.
 - For small projects, the public anon key and a simple policy may be sufficient. For larger or sensitive deployments, require authenticated sessions.
-Supabase Realtime chat wiring
 
-This document shows a minimal setup to receive/persist chat messages from the client using Supabase Realtime (or Postgres + supabase-realtime).
-# Supabase chat wiring (example)
-
-This document explains a simple way to wire the local chat widget to Supabase Realtime so messages can be synced across clients.
-
-## Requirements
-
-1. A Supabase project.
-2. A table to store messages. Example schema:
-
-```sql
-create table messages (
-  id uuid primary key default gen_random_uuid(),
-  username text,
-  message text,
-  created_at timestamptz default now()
-);
-```
-
-## Client example (JavaScript)
-
-1. Install the Supabase client:
-
-```bash
-npm install @supabase/supabase-js
-```
-
-2. Initialize and subscribe to new messages:
-
-```javascript
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://your-project.supabase.co'
-const supabaseKey = 'public-anon-key'
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-// Listen for inserted messages
-supabase
-  .from('messages')
-  .on('INSERT', payload => {
-    const msg = payload.new
-    // append msg to your UI, for example push to localStorage-backed chat
-  })
-  .subscribe()
-
-// Send a message
-async function sendMessage(username, message) {
-  await supabase.from('messages').insert({ username, message })
-}
-```
-
-## Notes
-
-- Use Row Level Security (RLS) and policies to restrict who may insert messages in a production app.
-- The example uses the public anon key to receive realtime updates; writes can be restricted via RLS and authenticated requests.
-- For small projects, the public anon key and a simple policy may be sufficient. For larger or sensitive deployments, require authenticated sessions.
-
-## Realtime chat wiring (alternate)
+Realtime chat wiring (alternate)
 
 1. Supabase setup
 
@@ -120,16 +62,16 @@ async function sendMessage(username, message) {
 - Enable Realtime for the `chats` table.
 - Create an API key (anon for client, service_role for server tasks if needed).
 
-2. Client snippet (vanilla JS)
+1. Client snippet (vanilla JS)
 
-- Use the `@supabase/supabase-js` client to subscribe and insert rows. See the code examples above (no inline <script> tags in this doc).
+- Use the `@supabase/supabase-js` client to subscribe and insert rows. See the code examples above.
 
-3. Security & moderation
+1. Security & moderation
 
 - Use Row Level Security (RLS) policies to limit inserts/reads per room.
 - For moderation, consider a separate `reports` table and a small admin UI to remove offensive messages.
 
-4. Server-side forwarding (optional)
+1. Server-side forwarding (optional)
 
 - If you want to forward verified payments or other events to Supabase, use a server with the service_role key and call the REST or JS API to insert rows.
 
@@ -151,13 +93,13 @@ Edge cases
 - Users with multiple tabs/devices: show device presence or allow per-device sessions.
 - Privacy: only forward signaling messages to intended peer(s); use RLS/policies to restrict access.
 
-Example approach (client-only):
+Example approach (client-only)
 
 1. Friend list storage: store an array of friend objects in a table (or client-localStorage for a demo). Each friend row: {id, username, displayName, status}.
 2. Presence: store presence rows or use Realtime presence channels (Supabase presence plugin) to notify online/offline state.
 3. Signaling channel: use a Supabase Realtime channel (or a table 'webrtc_signals' with INSERT events) where each message includes {from, to, type, payload} and is filtered server-side via RLS so only the recipient can read it.
 
-Client signaling flow (simplified):
+Client signaling flow (simplified)
 
 - Caller (A): create RTCPeerConnection, getUserMedia, add local tracks, createOffer(), setLocalDescription(offer), send offer via signaling ({type:'offer', sdp}) to userB.
 - Callee (B): receive offer from userA via signaling, create RTCPeerConnection, getUserMedia (or wait until accepted), setRemoteDescription(offer), createAnswer(), setLocalDescription(answer), send answer back via signaling.

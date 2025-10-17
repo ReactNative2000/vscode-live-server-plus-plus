@@ -56,8 +56,25 @@
   <div class="bg-blob"></div>
   <div class="bg-blob two"></div>
   <main class="card" role="main">
-  <h1>Lesson Reflection</h1>
-  <p class="lead">Fill in this short reflection — responses will be saved to a spreadsheet. If your connection drops, the browser will retry automatically when it's restored.</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;">
+    <div>
+      <h1 id="appTitle">Lesson Reflection</h1>
+      <p id="appLead" class="lead">Fill in this short reflection — responses will be saved to a spreadsheet. If your connection drops, the browser will retry automatically when it's restored.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label class="small" for="langSel">Lang</label>
+      <select id="langSel" class="small" style="padding:6px;border-radius:6px">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+      <label class="small" for="currencySel">Currency</label>
+      <select id="currencySel" class="small" style="padding:6px;border-radius:6px">
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="MXN">MXN</option>
+      </select>
+    </div>
+  </div>
 
     <form id="reflectionForm" aria-describedby="formHelp">
       <label for="fio">Student full name</label>
@@ -136,10 +153,17 @@
             <a id="cashLink" class="small" href="#" target="_blank" rel="noopener">Pay $brandon314314 on Cash App</a>
             <a id="paypalLink" class="small" href="#" target="_blank" rel="noopener" style="color:#003087">Pay via PayPal.me</a>
             <a id="venmoLink" class="small" href="#" target="_blank" rel="noopener" style="color:#3d95ce">Pay via Venmo</a>
+            <a id="bmacLink" class="small" href="#" target="_blank" rel="noopener" style="color:#ffb142">Buy Me a Coffee</a>
           </div>
-          <div id="qrWrap" style="width:110px;height:110px;background:#fff;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #eee">
+          <div id="qrWrap" role="button" tabindex="0" title="Tap to open Cash App" style="width:110px;height:110px;background:#fff;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #eee;cursor:pointer">
             <img id="cashQr" alt="Cash App QR" style="max-width:100%;max-height:100%" src="" />
           </div>
+        </div>
+        <div style="margin-top:10px;">
+          <button id="cashPayBtn" type="button" class="btn" style="background:#00c244;padding:10px 14px;border-radius:10px;color:#063;">Pay via Cash App</button>
+        </div>
+        <div style="margin-top:8px;">
+          <button id="bmacBtn" type="button" class="btn" style="background:#ffdd57;color:#6b3d00;padding:8px 12px;border-radius:10px;">Buy me a coffee</button>
         </div>
         <label style="display:block;margin-top:10px"><input type="checkbox" id="requirePayment"> Require payment before submitting (opens payment provider)</label>
         <p class="small">After payment, please mark the payment in your records — form submission is independent and will be sent regardless of payment. <strong>Please include your name and the game token in the payment note/memo</strong> to make reconciliation easier.</p>
@@ -492,15 +516,48 @@
         const qrSrc = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${qrData}&chld=L|1`;
         const cashLinkEl = document.getElementById('cashLink');
         const cashQrEl = document.getElementById('cashQr');
-        if(cashLinkEl){ cashLinkEl.href = cashUrl; cashLinkEl.textContent = `Pay ${cashtag} on Cash App`; }
-        if(cashQrEl) cashQrEl.src = qrSrc;
+  if(cashLinkEl){ cashLinkEl.href = cashUrl; cashLinkEl.textContent = `Pay ${cashtag} on Cash App`; }
+  if(cashQrEl) cashQrEl.src = qrSrc;
+  // Buy Me a Coffee link/QR (replace with your username if different)
+  const bmacUser = 'brandon314314';
+  const bmacUrl = `https://www.buymeacoffee.com/${encodeURIComponent(bmacUser)}`;
+  const bmacQr = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(bmacUrl)}&chld=L|1`;
+  const bmacLinkEl = document.getElementById('bmacLink');
+  const bmacBtn = document.getElementById('bmacBtn');
+  if(bmacLinkEl){ bmacLinkEl.href = bmacUrl; bmacLinkEl.textContent = `Buy Me a Coffee (${bmacUser})`; bmacLinkEl.addEventListener('click', ()=>trackPaymentClick('bmac')); }
+  if(bmacBtn){ bmacBtn.addEventListener('click', ()=>{ trackPaymentClick('bmac'); try{ window.open(bmacUrl,'_blank'); }catch(e){ location.href=bmacUrl; } }); }
+  // if you want to show a QR for Buy Me a Coffee, reuse the cash modal QR or add another img element
+
+        // click-tracking helper: record locally and POST to server if available
+        function trackPaymentClick(provider){
+          try{
+            const ev = { provider, ts: Date.now(), path: location.pathname };
+            const key = 'lspp_payment_clicks_v1';
+            const arr = JSON.parse(localStorage.getItem(key) || '[]'); arr.push(ev); localStorage.setItem(key, JSON.stringify(arr));
+            // POST to server if available; ignore network errors
+            fetch('/track', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(ev) }).catch(()=>{});
+          }catch(e){/*ignore*/}
+        }
+
+        // make the QR wrapper clickable / keyboard accessible so mobile users can tap it
+        const qrWrapEl = document.getElementById('qrWrap');
+        const cashPayBtnEl = document.getElementById('cashPayBtn');
+        const openCash = () => {
+          try{ window.open(cashUrl, '_blank'); }catch(e){ location.href = cashUrl; }
+        };
+        if(qrWrapEl){
+          qrWrapEl.addEventListener('click', ()=>{ trackPaymentClick('cashapp'); openCash(); });
+          qrWrapEl.addEventListener('keydown', (ev) => { if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); trackPaymentClick('cashapp'); openCash(); } });
+        }
+        if(cashPayBtnEl){ cashPayBtnEl.addEventListener('click', ()=>{ trackPaymentClick('cashapp'); openCash(); }); }
+
         // PayPal.me and Venmo links (replace YOUR_PAYPAL_NAME with your PayPal.me id)
         const paypalMe = 'brandon314314'; // change this to your PayPal.me id if different
         const venmoHandle = 'brandon314314'; // change to your Venmo username if desired
         const paypalLinkEl = document.getElementById('paypalLink');
         const venmoLinkEl = document.getElementById('venmoLink');
-        if(paypalLinkEl){ paypalLinkEl.href = `https://paypal.me/${encodeURIComponent(paypalMe)}`; paypalLinkEl.textContent = `Pay via PayPal.me (${paypalMe})`; }
-        if(venmoLinkEl){ venmoLinkEl.href = `https://venmo.com/${encodeURIComponent(venmoHandle)}`; venmoLinkEl.textContent = `Pay via Venmo (${venmoHandle})`; }
+  if(paypalLinkEl){ paypalLinkEl.href = `https://paypal.me/${encodeURIComponent(paypalMe)}`; paypalLinkEl.textContent = `Pay via PayPal.me (${paypalMe})`; paypalLinkEl.addEventListener('click', ()=>trackPaymentClick('paypal')); }
+  if(venmoLinkEl){ venmoLinkEl.href = `https://venmo.com/${encodeURIComponent(venmoHandle)}`; venmoLinkEl.textContent = `Pay via Venmo (${venmoHandle})`; venmoLinkEl.addEventListener('click', ()=>trackPaymentClick('venmo')); }
       }catch(e){ /* ignore */ }
 
       // queued responses UI
@@ -515,6 +572,44 @@
       }
       showQueueBtn && showQueueBtn.addEventListener('click', renderQueue);
     })();
+  </script>
+  <script>
+    // Simple i18n loader
+    const locales = {};
+    async function loadLocale(code){
+      if(locales[code]) return locales[code];
+      try{ const res = await fetch(`/docs/locales/${code}.json`); const j = await res.json(); locales[code]=j; return j; }catch(e){ return locales['en'] || {}; }
+    }
+    function applyLocale(data){
+      document.getElementById('appTitle').textContent = data.title || document.getElementById('appTitle').textContent;
+      document.getElementById('appLead').textContent = data.lead || document.getElementById('appLead').textContent;
+      document.querySelector('label[for="fio"]').textContent = data.fio || 'Student full name';
+      document.querySelector('label[for="topic"]').textContent = data.topic || 'Lesson topic';
+      document.querySelector('label[for="game"]').textContent = data.game || 'Which game did you play?';
+      document.querySelector('label[for="gameToken"]').textContent = data.game_token || 'Game token (share this with a friend to join)';
+      document.querySelector('label[for="q1"]').textContent = data.q1 || document.querySelector('label[for="q1"]').textContent;
+      document.querySelector('label[for="whatsOnMind"]').textContent = data.whatsOnMind || document.querySelector('label[for="whatsOnMind"]').textContent;
+      document.querySelector('label[for="q2"]').textContent = data.q2 || document.querySelector('label[for="q2"]').textContent;
+      document.querySelector('label[for="q3"]').textContent = data.q3 || document.querySelector('label[for="q3"]').textContent;
+      document.querySelector('label[for="q4"]').textContent = data.q4 || document.querySelector('label[for="q4"]').textContent;
+      document.querySelector('label[for="q5"]').textContent = data.q5 || document.querySelector('label[for="q5"]').textContent;
+      document.getElementById('submitBtn').textContent = data.send || document.getElementById('submitBtn').textContent;
+      // payment labels
+      document.querySelector('section[aria-label="Payment"] label').textContent = data.payment_label || 'Payment (optional)';
+    }
+    document.getElementById('langSel').addEventListener('change', async (e)=>{ const data = await loadLocale(e.target.value); applyLocale(data); });
+    // load default locale from navigator
+    (async ()=>{ const nav = (navigator.language||'en').slice(0,2); const pick = ['en','es'].includes(nav) ? nav : 'en'; document.getElementById('langSel').value = pick; const d = await loadLocale(pick); applyLocale(d); })();
+
+    // Stripe Checkout: create a session via server and redirect (server endpoint must implement /create-checkout)
+    async function startCheckout(amountCents){
+      try{
+        const cur = document.getElementById('currencySel').value || 'USD';
+        const res = await fetch('/create-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount: amountCents, currency: cur }) });
+        const j = await res.json();
+        if(j && j.url){ window.location = j.url; }
+      }catch(e){ alert('Checkout failed'); }
+    }
   </script>
   <!-- confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>

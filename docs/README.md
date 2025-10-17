@@ -1,16 +1,13 @@
 # Docs for Reflection Form
-# Docs for Reflection Form
 
 Short reference for the improved reflection form and related assets.
 
-Files
+Files of interest
 
 - `reflection_form_improved.html` — main resilient form (JSON-first POST, form-encoded fallback, offline queue).
 - `admin_reconcile.html` — reconciliation UI for matching payments to responses.
 - `manifest.webmanifest`, `sw.js`, and `icons/` — PWA assets.
-
-Quick local test
-
+- `request_examples/` — curl/HTTP examples for the Apps Script endpoint.
 # Docs for Reflection Form
 
 Short reference for the improved reflection form and related assets.
@@ -60,6 +57,27 @@ PWA / iOS install notes
 This site includes a Web App Manifest and a basic service worker to enable offline fallback and installability.
 
 - iOS (Safari) limitations: iOS supports web apps added to the Home Screen but has limitations (no push notifications, limited background sync, WebKit-only). For best results generate Apple touch icons and splash images.
+
+Generate icons (example using ImageMagick)
+
+```bash
+# from a source PNG (512x512) generate required icons
+convert icon-512.png -resize 192x192 docs/icons/icon-192.png
+convert icon-512.png -resize 152x152 docs/icons/icon-152.png
+convert icon-512.png -resize 167x167 docs/icons/icon-167.png
+convert icon-512.png -resize 180x180 docs/icons/icon-180.png
+# generate iOS splash sizes (example)
+convert icon-512.png -resize 1125x2436 docs/icons/apple-splash-1125x2436.png
+convert icon-512.png -resize 1242x2688 docs/icons/apple-splash-1242x2688.png
+convert icon-512.png -resize 828x1792 docs/icons/apple-splash-828x1792.png
+```
+
+PWA / iOS install notes
+
+This site includes a Web App Manifest and a basic service worker to enable offline fallback and installability.
+
+- iOS (Safari) limitations: iOS supports web apps added to the Home Screen but has limitations (no push notifications, limited background sync, WebKit-only). For best results generate Apple touch icons and splash images.
+
 
 Generate icons (example using ImageMagick)
 
