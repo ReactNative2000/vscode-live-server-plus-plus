@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.lspp",
+  "appName": "Live Server PWA",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reflection Form (App)</title>
+  <link rel="manifest" href="/docs/manifest.webmanifest">
+  <meta name="theme-color" content="#2b8a3e">
+</head>
+<body>
+  <noscript>JavaScript is required to load the app.</noscript>
+  <script>
+    // Minimal wrapper: prefer loading a hosted URL when online, otherwise use local copy
+    (function(){
+      const hosted = 'https://yourdomain.example/docs/reflection_form_improved.html';
+      if(navigator.onLine) {
+        // open hosted page for live data
+        location.replace(hosted);
+        return;
+      }
+      // Fallback to local bundled file if offline / bundled
+      const local = 'reflection_form_improved.html';
+      fetch(local, {method: 'HEAD'}).then(r=>{ if(r.ok) location.replace(local); else document.body.innerHTML = '<p>Unable to load app. Please connect to the internet.</p>'; }).catch(()=>{ document.body.innerHTML = '<p>Unable to load app. Please connect to the internet.</p>'; });
+    })();
+  </script>
+</body>
+</html>
