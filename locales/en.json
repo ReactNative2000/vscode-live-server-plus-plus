@@ -1,0 +1,18 @@
+{
+  "title": "Lesson Reflection — Form",
+  "lead": "Fill in this short reflection — responses will be saved to a spreadsheet. If your connection drops, the browser will retry automatically when it's restored.",
+  "fio": "Student full name",
+  "topic": "Lesson topic",
+  "game": "Which game did you play?",
+  "game_token": "Game token (share this with a friend to join)",
+  "q1": "1. What part of the lesson was clearest, and what remained unclear?",
+  "whatsOnMind": "What's on your mind?",
+  "q2": "2. At which moment did you get stuck or distracted?",
+  "q3": "3. Rate the lesson from 1 to 5",
+  "q4": "4. How do you feel leaving the lesson?",
+  "q5": "5. What could be improved in the lesson? (multiple)",
+  "send": "Send",
+  "payment_label": "Payment (optional)",
+  "pay_note": "If you'd like to support the author, you can pay via Cash App:",
+  "buy_me": "Buy Me a Coffee"
+}

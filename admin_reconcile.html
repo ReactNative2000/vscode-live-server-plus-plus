@@ -1,4 +1,46 @@
 <!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Reconcile</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#071322;color:#eef}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}button{padding:6px 10px;border-radius:6px;background:#6b8e23;border:none;color:#071226}</style>
+</head>
+<body>
+  <h1>Reconcile payments</h1>
+  <p>Provide admin token as `?admin_token=...` (for testing). This UI loads payments and pending applications and allows assigning an application to a payment.</p>
+  <div style="display:flex;gap:20px;align-items:flex-start">
+    <div style="flex:1">
+      <h2>Payments</h2>
+      <table id="payments"><thead><tr><th>ID</th><th>Stripe ID</th><th>Amount</th><th>Member</th><th>Action</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div style="width:360px">
+      <h2>Pending applications</h2>
+      <table id="apps"><thead><tr><th>ID</th><th>Name</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <script>
+    async function loadAll(){
+  const params = new URLSearchParams(location.search);
+  const token = params.get('admin_token') || '';
+  const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+  const [pRes,aRes] = await Promise.all([fetch('/admin/payments', { headers }), fetch('/admin/applications', { headers })]);
+      const pJson = await pRes.json(); const aJson = await aRes.json();
+      const tbody = document.querySelector('#payments tbody'); tbody.innerHTML='';
+      pJson.payments.forEach(p=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${p.id}</td><td>${p.stripe_id||''}</td><td>${(p.amount||'')}</td><td>${p.member_id||''}</td><td><button onclick="assign(${p.id})">Assign</button></td>`; tbody.appendChild(tr); });
+      const appsTb = document.querySelector('#apps tbody'); appsTb.innerHTML=''; aJson.applications.filter(a=>a.status==='pending').forEach(a=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${a.id}</td><td>${a.name}</td>`; appsTb.appendChild(tr); });
+    }
+    function assign(paymentId){
+      const appId = prompt('Enter application ID to assign to payment '+paymentId);
+      if(!appId) return;
+      const token = new URLSearchParams(location.search).get('admin_token') || '';
+      const headers = Object.assign({'content-type':'application/json'}, token ? { 'Authorization': 'Bearer ' + token } : {});
+      fetch('/admin/reconcile',{method:'POST',headers:headers,body:JSON.stringify({payment_id:paymentId,application_id:parseInt(appId,10)})}).then(()=>loadAll()).catch(e=>{console.error(e);alert('Error');});
+    }
+    loadAll();
+  </script>
+</body>
+</html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
