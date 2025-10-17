@@ -1,0 +1,5 @@
+# Runtime artifacts
+server/lspp.db
+server/server.log
+server/node_modules/
+out-*.zip
