@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson Reflection — Form</title>
+  <!-- PWA / iOS meta -->
+  <link rel="manifest" href="/docs/manifest.webmanifest">
+  <meta name="theme-color" content="#2b8a3e">
+  <!-- Apple splash / icons -->
+  <link rel="apple-touch-icon" href="/docs/icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/docs/icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/docs/icons/icon-167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/docs/icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- iOS splash screens (recommended to generate for a polished look) -->
+  <link rel="apple-touch-startup-image" href="/docs/icons/apple-splash-1125x2436.png" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3)">
+  <link rel="apple-touch-startup-image" href="/docs/icons/apple-splash-1242x2688.png" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3)">
+  <link rel="apple-touch-startup-image" href="/docs/icons/apple-splash-828x1792.png" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2)">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f6fbff;--card:rgba(255,255,255,0.9);--accent:#ff6b6b;--muted:#5b6b72}
+    body{font-family:Rubik, Inter, Arial, Helvetica, sans-serif;margin:24px;background:linear-gradient(135deg,#e6f7ff 0%,#fff0f6 100%);color:#122}
+    /* playful floating blobs */
+    .bg-blob{position:fixed;right:-120px;top:-80px;width:360px;height:360px;background:radial-gradient(circle at 30% 30%, rgba(255,107,107,0.18), rgba(255,107,107,0.06));border-radius:50%;filter:blur(40px);pointer-events:none;z-index:0}
+    .bg-blob.two{left:-140px;top:140px;width:420px;height:420px;background:radial-gradient(circle at 70% 70%, rgba(43,138,62,0.15), rgba(43,138,62,0.04));}
+    .card{position:relative;z-index:1;max-width:760px;margin:18px auto;padding:26px;border-radius:16px;background:var(--card);box-shadow:0 10px 30px rgba(18,34,48,0.08);backdrop-filter:blur(6px)}
+    h1{font-size:22px;margin:0 0 8px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    label{display:block;margin:12px 0 6px;font-weight:600}
+    input[type=text],textarea,select{width:100%;padding:12px;border-radius:10px;border:1px solid #e6edf2;font-size:14px}
+    textarea{min-height:90px;resize:vertical}
+    .checkbox-group label{font-weight:400;display:block;margin:6px 0}
+    .controls{display:flex;gap:12px;align-items:center;margin-top:18px}
+    button{background:linear-gradient(90deg,var(--accent),#ff9f43);color:#fff;padding:12px 16px;border:none;border-radius:12px;cursor:pointer;font-weight:700;box-shadow:0 8px 20px rgba(255,111,111,0.12);transition:transform .18s ease,box-shadow .18s}
+    button:hover{transform:translateY(-3px);box-shadow:0 16px 30px rgba(255,111,111,0.14)}
+    button:active{transform:translateY(-1px)}
+    button[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+    .msg{padding:10px;border-radius:10px;margin-top:12px}
+    .msg.success{background:linear-gradient(90deg,#ecffef,#e6fff6);color:#0b6b3a}
+    .msg.error{background:#fff1f2;color:#7f1d1d}
+    .small{font-size:13px;color:var(--muted)}
+    /* subtle pulse after success */
+    .celebrate{animation:pop .9s ease-out}
+    @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
+    /* Cash App modal styles */
+    .modal{position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:1200}
+    .modal.active{display:flex}
+    .modal .box{background:#fff;padding:18px;border-radius:12px;max-width:420px;width:94%;text-align:center;box-shadow:0 10px 40px rgba(2,6,23,0.3)}
+    .modal .qr{width:160px;height:160px;object-fit:contain;margin:8px auto}
+    .modal .actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
+  </style>
+</head>
+<body>
+  <div class="bg-blob"></div>
+  <div class="bg-blob two"></div>
+  <main class="card" role="main">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;">
+    <div>
+      <h1 id="appTitle">Lesson Reflection</h1>
+      <p id="appLead" class="lead">Fill in this short reflection — responses will be saved to a spreadsheet. If your connection drops, the browser will retry automatically when it's restored.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label class="small" for="langSel">Lang</label>
+      <select id="langSel" class="small" style="padding:6px;border-radius:6px">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
+      <label class="small" for="currencySel">Currency</label>
+      <select id="currencySel" class="small" style="padding:6px;border-radius:6px">
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="MXN">MXN</option>
+      </select>
+    </div>
+  </div>
+
+    <form id="reflectionForm" aria-describedby="formHelp">
+      <label for="fio">Student full name</label>
+      <input type="text" id="fio" name="fio" autocomplete="name" required>
+  <label for="email">Email (optional)</label>
+  <input type="text" id="email" name="email" autocomplete="email" placeholder="you@example.com">
+
+      <label for="topic">Lesson topic</label>
+      <input type="text" id="topic" name="topic" required>
+
+      <label for="game">Which game did you play?</label>
+      <select id="game" name="game">
+        <option value="">--None/Not applicable--</option>
+        <option value="Chess">Chess</option>
+        <option value="Checkers">Checkers</option>
+        <option value="Tic-Tac-Toe">Tic-Tac-Toe</option>
+        <option value="Memory">Memory / Matching</option>
+        <option value="Simon">Simon / Pattern</option>
+        <option value="Pong">Pong</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label for="gameToken">Game token (share this with a friend to join)</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="gameToken" name="token" placeholder="Auto or paste a token" style="flex:1;padding:10px;border-radius:8px;border:1px solid #e6edf2" />
+        <button id="genToken" type="button" class="btn">Generate</button>
+        <button id="copyLink" type="button" class="btn">Copy invite link</button>
+      </div>
+      <p id="tokenHint" class="small">Tip: share the invite link so others can join with the same token.</p>
+
+      <label for="q1">1. What part of the lesson was clearest, and what remained unclear? ✍️</label>
+      <textarea id="q1" name="q1" required></textarea>
+
+  <label for="whatsOnMind">What's on your mind?</label>
+  <textarea id="whatsOnMind" name="whatsOnMind" placeholder="Share a quick thought (optional)"></textarea>
+
+      <label for="q2">2. At which moment did you get stuck or distracted? 🧐</label>
+      <textarea id="q2" name="q2" required></textarea>
+
+      <label for="q3">3. Rate the lesson from 1 to 5 ⭐</label>
+      <select id="q3" name="q3" required>
+        <option value="">--Select--</option>
+        <option value="1">1 - didn't understand at all</option>
+        <option value="2">2</option>
+        <option value="3">3 - okay</option>
+        <option value="4">4</option>
+        <option value="5">5 - great!</option>
+      </select>
+
+      <label for="q4">4. How do you feel leaving the lesson? 😊😐😢🤩</label>
+      <select id="q4" name="q4" required>
+        <option value="">--Choose--</option>
+        <option value="😊">😊 Happy</option>
+        <option value="😐">😐 Neutral</option>
+        <option value="😢">😢 Sad</option>
+        <option value="🤩">🤩 Excited</option>
+      </select>
+
+      <label>5. What could be improved in the lesson? (multiple)</label>
+      <div class="checkbox-group" role="group" aria-label="Что можно улучшить">
+  <label><input type="checkbox" name="q5" value="More examples"> More examples</label>
+  <label><input type="checkbox" name="q5" value="More interaction"> More interaction</label>
+  <label><input type="checkbox" name="q5" value="Slower pace"> Slower pace</label>
+  <label><input type="checkbox" name="q5" value="Faster pace"> Faster pace</label>
+  <label><input type="checkbox" name="q5" value="More images/videos"> More images/videos</label>
+      </div>
+
+      <div class="controls">
+        <button id="submitBtn" type="submit">Send</button>
+        <div class="small" id="statusText">&nbsp;</div>
+      </div>
+
+      <section aria-label="Payment" style="margin-top:14px;border-top:1px solid #eee;padding-top:12px;">
+  <label style="font-weight:600;">Payment (optional)</label>
+  <p class="small">If you'd like to support the author, you can pay via Cash App:</p>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <a id="cashLink" class="small" href="#" target="_blank" rel="noopener" data-event="payment_click" data-provider="cashapp">Pay $brandon314314 on Cash App</a>
+            <a id="paypalLink" class="small" href="#" target="_blank" rel="noopener" style="color:#003087" data-event="payment_click" data-provider="paypal">Pay via PayPal.me</a>
+            <a id="venmoLink" class="small" href="#" target="_blank" rel="noopener" style="color:#3d95ce" data-event="payment_click" data-provider="venmo">Pay via Venmo</a>
+            <a id="bmacLink" class="small" href="#" target="_blank" rel="noopener" style="color:#ffb142" data-event="payment_click" data-provider="bmac">Buy Me a Coffee</a>
+          </div>
+          <div id="qrWrap" role="button" tabindex="0" title="Tap to open Cash App" style="width:110px;height:110px;background:#fff;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px solid #eee;cursor:pointer">
+            <img id="cashQr" alt="Cash App QR" style="max-width:100%;max-height:100%" src="" />
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <button id="cashPayBtn" type="button" class="btn" style="background:#00c244;padding:10px 14px;border-radius:10px;color:#063;" data-event="payment_click" data-provider="cashapp">Pay via Cash App</button>
+        </div>
+        <div style="margin-top:8px;">
+          <button id="bmacBtn" type="button" class="btn" style="background:#ffdd57;color:#6b3d00;padding:8px 12px;border-radius:10px;">Buy me a coffee</button>
+        </div>
+        <label style="display:block;margin-top:10px"><input type="checkbox" id="requirePayment"> Require payment before submitting (opens payment provider)</label>
+        <p class="small">After payment, please mark the payment in your records — form submission is independent and will be sent regardless of payment. <strong>Please include your name and the game token in the payment note/memo</strong> to make reconciliation easier.</p>
+      </section>
+
+      <div style="margin-top:12px;">
+        <button id="showQueueBtn" type="button" class="btn" style="background:linear-gradient(90deg,#6b8bff,#9f6bff);">Show queued responses</button>
+      </div>
+
+      <div id="feedback" aria-live="polite"></div>
+      <p class="small">Want to chat with other students or leave a quick note? Use the chat button (bottom-right).</p>
+      <p id="formHelp" class="small">Responses are saved via Google Apps Script. If there's a problem, try again later — the browser will retry automatically.</p>
+    </form>
+  </main>
+
+  <!-- Chat widget -->
+  <div id="chatBtn" style="position:fixed;right:18px;bottom:18px;z-index:1400">
+    <button id="openChat" class="btn" style="border-radius:50%;width:56px;height:56px;padding:10px">💬</button>
+  </div>
+  <div id="chatModal" class="modal" aria-hidden="true" style="display:none;align-items:flex-end;justify-content:flex-end;">
+    <div class="box" style="width:320px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;padding:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong>Chat</strong>
+        <button id="closeChat" class="btn" style="padding:6px;border-radius:8px;background:#eee;color:#222">Close</button>
+      </div>
+      <div id="chatList" style="flex:1;overflow:auto;padding:8px;border-radius:8px;border:1px solid #f0f0f0;background:#fff"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input id="chatInput" placeholder="Say something..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6edf2" />
+        <button id="sendChat" class="btn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cash App modal -->
+  <div id="cashModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cashModalTitle">
+    <div class="box">
+      <h3 id="cashModalTitle">Pay with Cash App</h3>
+      <p>Please complete the payment in Cash App. When done, tap "I paid — continue" to submit your reflection.</p>
+      <img id="modalQr" class="qr" src="" alt="Cash App QR" />
+      <p><a id="modalLink" href="#" target="_blank" rel="noopener">Open Cash App</a></p>
+      <div class="actions">
+        <button id="cancelPay" class="btn">Cancel</button>
+        <button id="iPaidBtn" class="btn primary">I paid — continue</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/docs/event-tracker.js"></script>
+  <script>
+  // Chat widget: lightweight localStorage-backed chat and integration with form sends
+  (function(){
+    const CHAT_KEY = 'lspp_chat_v1';
+    const chatBtn = document.getElementById('openChat');
+    const chatModal = document.getElementById('chatModal');
+    const closeChat = document.getElementById('closeChat');
+    const chatList = document.getElementById('chatList');
+    const chatInput = document.getElementById('chatInput');
+    const sendChat = document.getElementById('sendChat');
+
+    function loadChat(){
+      try{
+        const raw = localStorage.getItem(CHAT_KEY) || '[]';
+        return JSON.parse(raw);
+      }catch(e){return []}
+    }
+    function saveChat(arr){ localStorage.setItem(CHAT_KEY, JSON.stringify(arr)); }
+    function renderChat(){
+      const items = loadChat();
+      chatList.innerHTML = items.map(it=>`<div style="margin-bottom:8px"><small style="color:#666">${escapeHtml(new Date(it.t).toLocaleTimeString())}</small><div>${escapeHtml(it.text)}</div></div>`).join('');
+      chatList.scrollTop = chatList.scrollHeight;
+    }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    chatBtn.addEventListener('click',()=>{ chatModal.style.display='flex'; chatModal.setAttribute('aria-hidden','false'); renderChat(); chatInput.focus(); });
+    closeChat.addEventListener('click',()=>{ chatModal.style.display='none'; chatModal.setAttribute('aria-hidden','true'); });
+    sendChat.addEventListener('click', ()=>{ sendCurrentChat(); });
+    chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendCurrentChat(); } });
+
+    function sendCurrentChat(){
+      const txt = (chatInput.value || '').trim();
+      if(!txt) return;
+      const arr = loadChat();
+      const item = { t: Date.now(), text: txt };
+      arr.push(item);
+      saveChat(arr);
+      renderChat();
+      chatInput.value='';
+      // post to endpoint as type=chat — non-blocking
+      if(typeof sendPayload === 'function'){
+        sendPayload({ type: 'chat', chat: item }).catch(()=>{/*ignore*/});
+      }
+    }
+
+    // Expose a method to include recent chat with form submits
+    window.__lspp_getRecentChat = function(limit=5){
+      try{ const arr = loadChat(); return arr.slice(-limit); }catch(e){return []}
+    }
+  })();
+
+    (function(){
+      const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwELGti1O-UzG5fhGf0IYJY-wZ1wzYmxGO4aGgi9WpzwO0Wr_SjGIc-68MHY72kUmJ7rA/exec';
+      const form = document.getElementById('reflectionForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const feedback = document.getElementById('feedback');
+      const statusText = document.getElementById('statusText');
+      const STORAGE_KEY = 'reflection_offline_queue_v1';
+
+      // utility: show message
+      function showMessage(type, text){
+        feedback.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'msg ' + (type === 'ok' ? 'success' : 'error');
+        div.textContent = text;
+        feedback.appendChild(div);
+      }
+
+      // read queued items
+      function loadQueue(){
+        try{
+          return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        }catch(e){
+          return [];
+        }
+      }
+      function saveQueue(q){ localStorage.setItem(STORAGE_KEY, JSON.stringify(q)); }
+
+      // add to offline queue
+      function enqueue(data){
+        const q = loadQueue(); q.push({data, ts:Date.now()}); saveQueue(q);
+        updateStatus();
+      }
+
+      function updateStatus(){
+        const q = loadQueue();
+        if(q.length) statusText.textContent = `В очереди на отправку: ${q.length}`;
+  else statusText.textContent = navigator.onLine ? 'Ready' : 'Offline — responses will be sent when connection returns';
+      }
+
+      // helper: timeout for fetch
+      function fetchWithTimeout(url, opts = {}, timeout = 8000){
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('timeout')), timeout);
+          fetch(url, opts).then(res => { clearTimeout(timer); resolve(res); }).catch(err => { clearTimeout(timer); reject(err); });
+        });
+      }
+
+      async function sendFormEncoded(payload){
+        const params = new URLSearchParams();
+        if(payload.fio) params.append('fio', payload.fio);
+        if(payload.topic) params.append('topic', payload.topic);
+        if(payload.game) params.append('game', payload.game);
+    if(payload.token) params.append('token', payload.token);
+        if(payload.whatsOnMind) params.append('whatsOnMind', payload.whatsOnMind);
+        if(payload.chat && Array.isArray(payload.chat)) params.append('chat', JSON.stringify(payload.chat));
+        if(payload.q1) params.append('q1', payload.q1);
+        if(payload.q2) params.append('q2', payload.q2);
+        if(payload.q3) params.append('q3', payload.q3);
+        if(payload.q4) params.append('q4', payload.q4);
+        if(Array.isArray(payload.q5)){
+          payload.q5.forEach(v => params.append('q5', v));
+        }
+
+        return fetchWithTimeout(ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          body: params.toString()
+        }, 10000);
+      }
+
+      async function sendPayload(payload){
+        // Try JSON first (modern servers). If server rejects or returns non-OK,
+        // attempt form-encoded fallback which is commonly accepted by Google Apps Script.
+        try{
+          const res = await fetchWithTimeout(ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }, 10000);
+
+          if(res.ok) return res;
+
+          // non-OK — try form-encoded as fallback
+          const res2 = await sendFormEncoded(payload);
+          return res2;
+        }catch(err){
+          // network/timeout — rethrow to be handled by caller
+          throw err;
+        }
+      }
+
+      async function flushQueue(){
+        const q = loadQueue();
+        if(!q.length) return;
+        // send items in FIFO order
+        while(q.length){
+          const item = q[0];
+          try{
+            await sendPayload(item.data);
+            q.shift();
+            saveQueue(q);
+            updateStatus();
+          }catch(err){
+            // stop on first failure — will retry later
+            updateStatus();
+            return;
+          }
+        }
+      }
+
+      // try flushing when online
+      window.addEventListener('online', () => { updateStatus(); flushQueue().catch(()=>{}); });
+      window.addEventListener('offline', () => updateStatus());
+
+      // helper: perform the same send flow given a data object
+      async function sendData(data){
+        feedback.innerHTML = '';
+        submitBtn.disabled = true; submitBtn.textContent = 'Sending...';
+        try{
+          if(!navigator.onLine){
+            enqueue(data);
+            showMessage('ok', 'Offline — your response has been saved and will be sent when connection is restored.');
+            form.reset(); updateStatus();
+            return;
+          }
+
+          const res = await sendPayload(data);
+          if(res && res.ok){
+            showMessage('ok', '✅ Response saved to the spreadsheet! Thank you.');
+            form.reset();
+            try{ window.confetti && window.confetti({particleCount:80,spread:120}); }catch(e){}
+            document.querySelector('.card').classList.add('celebrate');
+            setTimeout(()=>document.querySelector('.card').classList.remove('celebrate'),900);
+            flushQueue().catch(()=>{});
+          }else{
+            enqueue(data);
+            showMessage('err', 'Server returned an error — response queued and will be retried later.');
+          }
+        }catch(err){
+          enqueue(data);
+          showMessage('err', 'Network or server error — response queued for retry.');
+        }finally{
+          submitBtn.disabled = false; submitBtn.textContent = 'Send';
+          updateStatus();
+        }
+      }
+
+      // token helpers: read token from URL, generate, copy invite link
+      const tokenEl = document.getElementById('gameToken');
+      const genTokenBtn = document.getElementById('genToken');
+      const copyLinkBtn = document.getElementById('copyLink');
+      const tokenHint = document.getElementById('tokenHint');
+
+      function generateToken(len = 6){
+        const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let out = '';
+        for(let i=0;i<len;i++) out += alphabet[Math.floor(Math.random()*alphabet.length)];
+        return out;
+      }
+
+      // read ?token= from URL
+      try{
+        const url = new URL(window.location.href);
+        const t = url.searchParams.get('token');
+        if(t){ tokenEl.value = t; tokenHint.textContent = 'Joined game: ' + t; }
+      }catch(e){}
+
+      genTokenBtn && genTokenBtn.addEventListener('click', ()=>{ const t = generateToken(); tokenEl.value = t; tokenHint.textContent = 'Token: '+t; });
+      copyLinkBtn && copyLinkBtn.addEventListener('click', ()=>{
+        const t = tokenEl.value || generateToken();
+        const invite = `${location.origin + location.pathname}?token=${encodeURIComponent(t)}`;
+        navigator.clipboard && navigator.clipboard.writeText(invite).then(()=>{ tokenHint.textContent = 'Invite link copied'; }).catch(()=>{ tokenHint.textContent = invite; });
+      });
+
+      // modal / payment orchestration
+      const requirePaymentEl = document.getElementById('requirePayment');
+      const cashModal = document.getElementById('cashModal');
+      const modalQr = document.getElementById('modalQr');
+      const modalLink = document.getElementById('modalLink');
+      const iPaidBtn = document.getElementById('iPaidBtn');
+      const cancelPay = document.getElementById('cancelPay');
+
+      // populate modal links (mirrors the section qr/link)
+      try{
+        const cashtag = '$brandon314314';
+        const cashUrl = `https://cash.app/$${encodeURIComponent(cashtag.replace('$',''))}`;
+        const qrData = encodeURIComponent(cashUrl);
+        const qrSrc = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${qrData}&chld=L|1`;
+        if(modalLink) modalLink.href = cashUrl;
+        if(modalQr) modalQr.src = qrSrc;
+      }catch(e){ }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        // collect data (same as before)
+        const data = {
+          fio: document.getElementById('fio').value.trim(),
+          topic: document.getElementById('topic').value.trim(),
+          token: document.getElementById('gameToken').value.trim(),
+          whatsOnMind: document.getElementById('whatsOnMind').value.trim(),
+          q1: document.getElementById('q1').value.trim(),
+          q2: document.getElementById('q2').value.trim(),
+          q3: document.getElementById('q3').value,
+          q4: document.getElementById('q4').value,
+          q5: Array.from(document.querySelectorAll('input[name="q5"]:checked')).map(el=>el.value)
+        };
+        // attach recent chat (non-blocking)
+        try{ data.chat = (typeof window.__lspp_getRecentChat === 'function') ? window.__lspp_getRecentChat(10) : []; }catch(e){ data.chat = []; }
+        // basic validation
+        if(!data.fio || !data.topic || !data.q1 || !data.q2 || !data.q3 || !data.q4){
+          showMessage('err', 'Please fill in all required fields.');
+          return;
+        }
+
+        // if user requested a payment requirement, show the modal and wait for confirmation
+        if(requirePaymentEl && requirePaymentEl.checked){
+          // show modal; when user confirms, proceed to sendData
+          cashModal.classList.add('active');
+
+          const onConfirm = ()=>{
+            cashModal.classList.remove('active');
+            iPaidBtn.removeEventListener('click', onConfirm);
+            cancelPay.removeEventListener('click', onCancel);
+            sendData(data);
+          };
+          const onCancel = ()=>{
+            cashModal.classList.remove('active');
+            iPaidBtn.removeEventListener('click', onConfirm);
+            cancelPay.removeEventListener('click', onCancel);
+            showMessage('err', 'Payment required but cancelled. Submission not sent.');
+          };
+
+          iPaidBtn.addEventListener('click', onConfirm);
+          cancelPay.addEventListener('click', onCancel);
+          return;
+        }
+
+        // otherwise, proceed immediately
+        sendData(data);
+      });
+
+      // initial status and attempt to flush on load
+      updateStatus();
+      if(navigator.onLine) flushQueue().catch(()=>{});
+
+      // Payment QR/link generation
+      try{
+        const cashtag = '$brandon314314';
+        // Cash App deep link (works on mobile) and web link
+        const cashUrl = `https://cash.app/$${encodeURIComponent(cashtag.replace('$',''))}`;
+        const qrData = encodeURIComponent(cashUrl);
+        const qrSrc = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${qrData}&chld=L|1`;
+        const cashLinkEl = document.getElementById('cashLink');
+        const cashQrEl = document.getElementById('cashQr');
+  if(cashLinkEl){ cashLinkEl.href = cashUrl; cashLinkEl.textContent = `Pay ${cashtag} on Cash App`; }
+  if(cashQrEl) cashQrEl.src = qrSrc;
+  // Buy Me a Coffee link/QR (replace with your username if different)
+  const bmacUser = 'brandon314314';
+  const bmacUrl = `https://www.buymeacoffee.com/${encodeURIComponent(bmacUser)}`;
+  const bmacQr = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(bmacUrl)}&chld=L|1`;
+  const bmacLinkEl = document.getElementById('bmacLink');
+  const bmacBtn = document.getElementById('bmacBtn');
+  if(bmacLinkEl){ bmacLinkEl.href = bmacUrl; bmacLinkEl.textContent = `Buy Me a Coffee (${bmacUser})`; bmacLinkEl.addEventListener('click', ()=>trackPaymentClick('bmac')); }
+  if(bmacBtn){ bmacBtn.addEventListener('click', ()=>{ trackPaymentClick('bmac'); try{ window.open(bmacUrl,'_blank'); }catch(e){ location.href=bmacUrl; } }); }
+  // if you want to show a QR for Buy Me a Coffee, reuse the cash modal QR or add another img element
+
+        // click-tracking helper: record locally and POST to server if available
+        function trackPaymentClick(provider){
+          try{
+            const ev = { provider, ts: Date.now(), path: location.pathname };
+            const key = 'lspp_payment_clicks_v1';
+            const arr = JSON.parse(localStorage.getItem(key) || '[]'); arr.push(ev); localStorage.setItem(key, JSON.stringify(arr));
+            // POST to server if available; ignore network errors
+            fetch('/track', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(ev) }).catch(()=>{});
+          }catch(e){/*ignore*/}
+        }
+
+        // make the QR wrapper clickable / keyboard accessible so mobile users can tap it
+        const qrWrapEl = document.getElementById('qrWrap');
+        const cashPayBtnEl = document.getElementById('cashPayBtn');
+        const openCash = () => {
+          try{ window.open(cashUrl, '_blank'); }catch(e){ location.href = cashUrl; }
+        };
+        if(qrWrapEl){
+          qrWrapEl.addEventListener('click', ()=>{ trackPaymentClick('cashapp'); openCash(); });
+          qrWrapEl.addEventListener('keydown', (ev) => { if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); trackPaymentClick('cashapp'); openCash(); } });
+        }
+        if(cashPayBtnEl){ cashPayBtnEl.addEventListener('click', ()=>{ trackPaymentClick('cashapp'); openCash(); }); }
+
+        // PayPal.me and Venmo links (replace YOUR_PAYPAL_NAME with your PayPal.me id)
+        const paypalMe = 'brandon314314'; // change this to your PayPal.me id if different
+        const venmoHandle = 'brandon314314'; // change to your Venmo username if desired
+        const paypalLinkEl = document.getElementById('paypalLink');
+        const venmoLinkEl = document.getElementById('venmoLink');
+  if(paypalLinkEl){ paypalLinkEl.href = `https://paypal.me/${encodeURIComponent(paypalMe)}`; paypalLinkEl.textContent = `Pay via PayPal.me (${paypalMe})`; paypalLinkEl.addEventListener('click', ()=>trackPaymentClick('paypal')); }
+  if(venmoLinkEl){ venmoLinkEl.href = `https://venmo.com/${encodeURIComponent(venmoHandle)}`; venmoLinkEl.textContent = `Pay via Venmo (${venmoHandle})`; venmoLinkEl.addEventListener('click', ()=>trackPaymentClick('venmo')); }
+      }catch(e){ /* ignore */ }
+
+      // queued responses UI
+      const showQueueBtn = document.getElementById('showQueueBtn');
+      function renderQueue(){
+        const q = loadQueue();
+        if(!q.length) return alert('No queued responses');
+        const list = q.map((it, idx) => `${idx+1}. ${it.data.fio || '—'} | ${new Date(it.ts).toLocaleString()} | ${it.data.topic || ''}`).join('\n');
+        if(confirm(list + '\n\nWould you like to retry sending queued items now?')){
+          flushQueue().then(()=>{ alert('Retry attempted — check status text for remaining queue.'); }).catch(()=>{ alert('Retry failed — will try again later.'); });
+        }
+      }
+      showQueueBtn && showQueueBtn.addEventListener('click', renderQueue);
+    })();
+  </script>
+  <script>
+    // Simple i18n loader
+    const locales = {};
+    async function loadLocale(code){
+      if(locales[code]) return locales[code];
+      try{ const res = await fetch(`/docs/locales/${code}.json`); const j = await res.json(); locales[code]=j; return j; }catch(e){ return locales['en'] || {}; }
+    }
+    function applyLocale(data){
+      document.getElementById('appTitle').textContent = data.title || document.getElementById('appTitle').textContent;
+      document.getElementById('appLead').textContent = data.lead || document.getElementById('appLead').textContent;
+      document.querySelector('label[for="fio"]').textContent = data.fio || 'Student full name';
+      document.querySelector('label[for="topic"]').textContent = data.topic || 'Lesson topic';
+      document.querySelector('label[for="game"]').textContent = data.game || 'Which game did you play?';
+      document.querySelector('label[for="gameToken"]').textContent = data.game_token || 'Game token (share this with a friend to join)';
+      document.querySelector('label[for="q1"]').textContent = data.q1 || document.querySelector('label[for="q1"]').textContent;
+      document.querySelector('label[for="whatsOnMind"]').textContent = data.whatsOnMind || document.querySelector('label[for="whatsOnMind"]').textContent;
+      document.querySelector('label[for="q2"]').textContent = data.q2 || document.querySelector('label[for="q2"]').textContent;
+      document.querySelector('label[for="q3"]').textContent = data.q3 || document.querySelector('label[for="q3"]').textContent;
+      document.querySelector('label[for="q4"]').textContent = data.q4 || document.querySelector('label[for="q4"]').textContent;
+      document.querySelector('label[for="q5"]').textContent = data.q5 || document.querySelector('label[for="q5"]').textContent;
+      document.getElementById('submitBtn').textContent = data.send || document.getElementById('submitBtn').textContent;
+      // payment labels
+      document.querySelector('section[aria-label="Payment"] label').textContent = data.payment_label || 'Payment (optional)';
+    }
+    document.getElementById('langSel').addEventListener('change', async (e)=>{ const data = await loadLocale(e.target.value); applyLocale(data); });
+    // load default locale from navigator
+    (async ()=>{ const nav = (navigator.language||'en').slice(0,2); const pick = ['en','es'].includes(nav) ? nav : 'en'; document.getElementById('langSel').value = pick; const d = await loadLocale(pick); applyLocale(d); })();
+
+    // Stripe Checkout: create a session via server and redirect (server endpoint must implement /create-checkout)
+    async function startCheckout(amountCents, applicationId, customerEmail){
+      // amountCents: integer (cents)
+      try{
+        const cur = document.getElementById('currencySel').value || 'USD';
+        const payload = { amount: amountCents, currency: cur };
+        if(applicationId) payload.application_id = String(applicationId);
+        if(customerEmail) payload.customer_email = String(customerEmail);
+        // include optional token/game token and name to make reconciliation easier
+        try{ payload.token = document.getElementById('gameToken').value || undefined; }catch(e){}
+        try{ payload.customer_name = document.getElementById('fio').value || undefined; }catch(e){}
+        const res = await fetch('/create-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        const j = await res.json();
+        if(j && j.url){
+          // record the click (local + server) for analytics before redirect
+          try{ trackPaymentClick('stripe'); }catch(e){}
+          window.location = j.url;
+        } else {
+          alert('Checkout creation failed — please try again.');
+        }
+      }catch(e){ console.error(e); alert('Checkout failed — network or server error.'); }
+    }
+
+    // UX wrapper: read email and optionally generate an application id (token) and call startCheckout
+    async function startCheckoutFromForm(amountCents){
+      const email = (document.getElementById('email') || {}).value || '';
+      const appId = (document.getElementById('gameToken') || {}).value || '';
+      await startCheckout(amountCents, appId || undefined, email || undefined);
+    }
+  </script>
+  <!-- confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script>
+    // Register service worker for offline capability and PWA install
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/docs/sw.js').then(reg => {
+        // console.log('SW registered', reg);
+      }).catch(err => {
+        // console.warn('SW registration failed', err);
+      });
+    }
+    // iOS users: show a tiny hint when in standalone mode
+    (function(){
+      if(window.navigator.standalone === false){
+        // Not in standalone - you can prompt users to Add to Home Screen manually if you want
+      }
+    })();
+  </script>
+</body>
+</html>

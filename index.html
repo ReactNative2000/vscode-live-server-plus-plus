@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reflection & Games — Live</title>
+    <meta name="theme-color" content="#2b8a3e">
+    <link rel="icon" href="/images/vscode-live-server-plus-plus.svg">
+    <style>
+      :root{--bg:#f7fbff;--card:#fff;--accent:#2b8a3e;--muted:#556}
+      body{font-family:Inter,Arial,Helvetica,sans-serif;line-height:1.45;margin:0;background:linear-gradient(180deg,#f7fbff 0%,#fff 100%);color:var(--muted)}
+      .wrap{max-width:980px;margin:28px auto;padding:20px}
+      header{display:flex;gap:16px;align-items:center}
+      .logo{width:64px;height:64px;padding:8px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center}
+      h1{font-size:20px;margin:0}
+      p.lead{margin:6px 0 18px;color:#334}
+      .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
+      .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 20px rgba(18,34,48,0.06)}
+      .card h3{margin:0 0 8px;font-size:16px}
+      .card p{margin:0;color:#556}
+      .row{display:flex;gap:8px;align-items:center;margin-top:12px}
+      .btn{background:linear-gradient(90deg,var(--accent),#57b06a);color:#fff;padding:8px 12px;border-radius:10px;border:none;cursor:pointer}
+      .muted{color:#879}
+      footer{margin-top:22px;color:#778;font-size:13px}
+      .install{margin-left:auto}
+      .analytics{font-size:13px;color:#667;margin-top:10px}
+      pre{white-space:pre-wrap;font-size:13px}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="logo"><img src="/images/vscode-live-server-plus-plus.svg" alt="logo" style="width:40px;height:40px"/></div>
+        <div>
+          <h1>Reflection & Games</h1>
+          <p class="lead">Submit reflections, run small multiplayer games, and reconcile payments.</p>
+        </div>
+        <div class="install">
+          <button id="installBtn" class="btn" style="display:none">Install app</button>
+        </div>
+      </header>
+
+      <section class="grid">
+        <div class="card">
+          <h3>Reflection form</h3>
+          <p>Submit student reflections — offline queueing, Cash App tips, and game token support.</p>
+          <div class="row"><a class="btn" href="/reflection_form_improved.html">Open form</a></div>
+        </div>
+
+        <div class="card" id="adminCard">
+          <h3>Admin reconciliation</h3>
+          <p id="adminDesc">Manage payment reconciliation and review responses.</p>
+          <div class="row"><a id="adminLink" class="btn" href="/docs/admin_reconcile.html">Open admin UI</a></div>
+        </div>
+
+        <div class="card">
+          <h3>Request examples</h3>
+          <p>VS Code REST Client and curl examples to POST reflections to the Apps Script.</p>
+          <div class="row"><a class="btn" href="/docs/request_examples/send_reflection.http">Open examples</a></div>
+        </div>
+
+        <div class="card">
+          <h3>PWA & Manifest</h3>
+          <p>Installable PWA settings and icons. Use the Install button to add to home screen if available.</p>
+          <div class="row"><a class="btn" href="/docs/manifest.webmanifest">View manifest</a></div>
+        </div>
+      </section>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Local analytics (demo)</h3>
+        <p class="muted">Lightweight local event logger — stores pageviews & events in your browser (no external tracking).</p>
+        <div class="row">
+          <div id="pvCount" class="analytics">Pageviews: —</div>
+          <button id="exportEvents" class="btn">Export events</button>
+          <button id="clearEvents" class="btn" style="background:#ddd;color:#222">Clear</button>
+        </div>
+        <pre id="eventsDump" style="margin-top:10px;max-height:160px;overflow:auto"></pre>
+      </div>
+
+      <footer>
+        <div>Notes: use tokens to invite players; if you want automatic payments, integrate Stripe (server required).</div>
+      </footer>
+    </div>
+
+    <script>
+      // PWA install prompt
+      let deferredPrompt;
+      const installBtn = document.getElementById('installBtn');
+      window.addEventListener('beforeinstallprompt', (e)=>{
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'inline-block';
+      });
+      installBtn.addEventListener('click', async ()=>{
+        if(!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        deferredPrompt = null; installBtn.style.display = 'none';
+      });
+
+      // Auto-detect admin page existence and hide admin card/link if missing
+      (async function(){
+        try{
+          const res = await fetch('/docs/admin_reconcile.html', {method:'HEAD'});
+          if(!res.ok){ document.getElementById('adminCard').style.display='none'; }
+        }catch(e){ document.getElementById('adminCard').style.display='none'; }
+      })();
+
+      // Tiny local analytics: record pageviews and events in localStorage
+      (function(){
+        const key = 'lspp_local_events_v1';
+        function load(){ try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ return []; } }
+        function save(arr){ localStorage.setItem(key, JSON.stringify(arr)); }
+        function pushEvent(evt){ const a = load(); a.push(Object.assign({ts:new Date().toISOString()}, evt)); save(a); render(); }
+        function render(){ const a = load(); document.getElementById('pvCount').textContent = 'Pageviews: '+a.filter(x=>x.type==='pageview').length; document.getElementById('eventsDump').textContent = JSON.stringify(a.slice(-30), null, 2); }
+        // record a pageview
+        pushEvent({type:'pageview', path:location.pathname});
+        document.getElementById('exportEvents').addEventListener('click', ()=>{
+          const a = load(); const blob = new Blob([JSON.stringify(a, null, 2)], {type:'application/json'}); const url = URL.createObjectURL(blob);
+          const aEl = document.createElement('a'); aEl.href = url; aEl.download = 'lspp_events.json'; document.body.appendChild(aEl); aEl.click(); aEl.remove(); URL.revokeObjectURL(url);
+        });
+        document.getElementById('clearEvents').addEventListener('click', ()=>{ localStorage.removeItem(key); render(); });
+        render();
+      })();
+    </script>
+  </body>
+</html>

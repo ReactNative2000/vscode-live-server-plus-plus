@@ -1,0 +1,16 @@
+[Unit]
+Description=Live Server ++ (LS++ ) Node service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/lspp
+EnvironmentFile=/etc/lspp.env
+ExecStart=/usr/bin/node server/index.js
+Restart=on-failure
+RestartSec=5s
+SyslogIdentifier=lspp
+
+[Install]
+WantedBy=multi-user.target

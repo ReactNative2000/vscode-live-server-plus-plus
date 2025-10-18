@@ -1,0 +1,18 @@
+{
+  "title": "Reflexión de la lección — Formulario",
+  "lead": "Rellena esta breve reflexión — las respuestas se guardarán en una hoja de cálculo. Si tu conexión se corta, el navegador volverá a intentarlo cuando se restablezca.",
+  "fio": "Nombre completo del estudiante",
+  "topic": "Tema de la lección",
+  "game": "¿Qué juego jugaste?",
+  "game_token": "Token de juego (compártelo para unirse)",
+  "q1": "1. ¿Qué parte de la lección fue la más clara y qué quedó sin entender?",
+  "whatsOnMind": "¿Qué tienes en mente?",
+  "q2": "2. ¿En qué momento te atascaste o te distrajiste?",
+  "q3": "3. Califica la lección del 1 al 5",
+  "q4": "4. ¿Cómo te sientes al terminar la lección?",
+  "q5": "5. ¿Qué podría mejorarse en la lección? (múltiples)",
+  "send": "Enviar",
+  "payment_label": "Pago (opcional)",
+  "pay_note": "Si quieres apoyar al autor, puedes pagar a través de Cash App:",
+  "buy_me": "Invitar a un café"
+}
