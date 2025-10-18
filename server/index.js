@@ -39,6 +39,18 @@ db.serialize(() => {
     member_id INTEGER,
     created INTEGER
   )`);
+  db.run(`CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT,
+    provider TEXT,
+    label TEXT,
+    href TEXT,
+    path TEXT,
+    ts INTEGER,
+    ua TEXT,
+    raw TEXT,
+    created INTEGER
+  )`);
 });
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -115,8 +127,42 @@ app.post('/track', (req, res) => {
     try{ arr = JSON.parse(fs.readFileSync(storeFile, 'utf8') || '[]'); }catch(e){ arr = []; }
     arr.push(ev);
     fs.writeFileSync(storeFile, JSON.stringify(arr, null, 2));
+    // also persist into SQLite events table for long-term storage
+    try{
+      const now = Date.now();
+      const stmt = db.prepare('INSERT INTO events (type,provider,label,href,path,ts,ua,raw,created) VALUES (?,?,?,?,?,?,?,?,?)');
+      const raw = JSON.stringify(ev || {});
+      stmt.run(ev.type||ev.event||'ui_event', ev.provider||null, ev.label||null, ev.href||null, ev.path||null, ev.ts||now, (ev.ua||req.headers['user-agent']||''), raw, now);
+      stmt.finalize();
+    }catch(e){ console.error('Failed to persist event to DB', e && e.message); }
     return res.json({ ok: true, count: arr.length });
   }catch(err){ console.error(err); return res.status(500).json({ error: err.message }); }
+});
+
+// Admin-protected route: list events
+app.get('/admin/events', requireAdmin, (req, res) => {
+  const limit = parseInt(req.query.limit || '500', 10);
+  db.all('SELECT * FROM events ORDER BY created DESC LIMIT ?', [limit], (err, rows) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ events: rows });
+  });
+});
+
+// Admin export CSV for events
+app.get('/admin/export/events.csv', requireAdmin, (req, res) => {
+  db.all('SELECT * FROM events ORDER BY created DESC', [], (err, rows) => {
+    if(err) return res.status(500).send('error: ' + err.message);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="events.csv"');
+    // header
+    res.write('id,type,provider,label,href,path,ts,ua,created\n');
+    rows.forEach(r => {
+      // naive CSV escaping
+      const esc = v => '"' + String(v || '').replace(/"/g,'""') + '"';
+      res.write([r.id, r.type, r.provider, r.label, r.href, r.path, r.ts, r.ua, r.created].map(esc).join(',') + '\n');
+    });
+    res.end();
+  });
 });
 
 // POST /apply — receive a membership application

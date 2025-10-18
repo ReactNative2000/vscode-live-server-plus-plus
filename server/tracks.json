@@ -1,0 +1,14 @@
+[
+  {
+    "type": "payment_click",
+    "provider": "cashapp",
+    "label": "Cash App test",
+    "ts": 1697660000000
+  },
+  {
+    "type": "payment_click",
+    "provider": "cashapp",
+    "label": "Cash App test",
+    "ts": 1697660000000
+  }
+]
