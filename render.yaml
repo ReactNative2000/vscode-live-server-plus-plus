@@ -1,0 +1,31 @@
+# Render service definition for branch preview/staging
+# Create a new Web Service in Render and point it to this repository.
+# Set the "Branch" to feature/payments-admin to run branch deploys.
+
+services:
+  - type: web_service
+    name: vscode-live-server-plus-plus-staging
+    env: node
+    region: oregon
+    repo: https://github.com/ReactNative2000/vscode-live-server-plus-plus
+    branch: feature/payments-admin
+    buildCommand: npm install
+    startCommand: node index.js
+    instanceType: starter
+    envVars:
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: STRIPE_SECRET
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false

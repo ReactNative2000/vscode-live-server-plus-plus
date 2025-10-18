@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "docs/**", "use": "@vercel/static" },
+    { "src": "server/index.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/create-checkout", "dest": "/server/index.js" },
+    { "src": "/webhook", "dest": "/server/index.js" },
+    { "src": "/(.*)", "dest": "/docs/$1" }
+  ]
+}

@@ -1,0 +1,46 @@
+name: Notify Brandon (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Message to send'
+        required: true
+        default: 'Hello from the reflection form project.'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send SMS via Twilio
+        if: secrets.TWILIO_ACCOUNT_SID != '' && secrets.TWILIO_AUTH_TOKEN != '' && secrets.TWILIO_FROM != '' && secrets.TWILIO_TO != ''
+        env:
+          ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          FROM_NUMBER: ${{ secrets.TWILIO_FROM }}
+          TO_NUMBER: ${{ secrets.TWILIO_TO }}
+          MESSAGE: ${{ github.event.inputs.message }}
+        run: |
+          echo "Sending SMS to $TO_NUMBER"
+          response=$(curl -s -w "
+%{http_code}" -X POST "https://api.twilio.com/2010-04-01/Accounts/${ACCOUNT_SID}/Messages.json" \
+            -u "${ACCOUNT_SID}:${AUTH_TOKEN}" \
+            --data-urlencode "From=${FROM_NUMBER}" \
+            --data-urlencode "To=${TO_NUMBER}" \
+            --data-urlencode "Body=${MESSAGE}")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "Twilio HTTP: $http_code"
+          echo "$body"
+
+      - name: Send Telegram message via Bot
+        if: secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MESSAGE: ${{ github.event.inputs.message }}
+        run: |
+          echo "Sending Telegram message to $TELEGRAM_CHAT_ID"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d text="${MESSAGE}" | jq -r '. | if .ok then "Telegram sent" else .description end'
