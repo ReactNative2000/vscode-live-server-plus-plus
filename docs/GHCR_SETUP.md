@@ -18,5 +18,6 @@ Recommended steps to enable automatic pushes:
 If you prefer not to store a PAT, use the workflow dispatch `push=true` input to push images manually from the Actions UI.
 
 Security notes:
+
 - Keep PATs scoped narrowly and rotate them periodically.
 - Prefer the manual `push` workflow if you want human approval before image publication.
