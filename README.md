@@ -33,3 +33,7 @@ This project can optionally publish Docker images to GitHub Container Registry. 
 ## Safety and firearms policy
 
 This project maintains a neutral safety policy regarding firearms and weapons. See `docs/FIREARMS_POLICY.md` for details on what content is allowed and how to report concerns.
+
+## YouTube
+
+Watch videos and demos on the project's YouTube channel. You can embed videos in the `docs/` pages — the project uses privacy-enhanced embeds by default (youtube-nocookie). See `docs/YOUTUBE_SETUP.md` for best practices on embedding, monetization, and policy considerations.
