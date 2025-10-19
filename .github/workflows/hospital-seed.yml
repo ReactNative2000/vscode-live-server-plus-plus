@@ -1,0 +1,27 @@
+name: Build and seed hospital DB
+
+on:
+  workflow_dispatch:
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install deps
+        working-directory: server/hospital
+        run: npm ci
+      - name: Run seed
+        working-directory: server/hospital
+        run: node seed.js
+      - name: Upload seed artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hospital-db-json
+          path: |
+            server/hospital/db.json
+            server/hospital/hospital.db

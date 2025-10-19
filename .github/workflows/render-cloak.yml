@@ -1,3 +1,32 @@
+name: Render cloak SVGs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: Install puppeteer dependencies
+        run: sudo apt-get update && sudo apt-get install -y ca-certificates fonts-liberation libatk-bridge2.0-0 libatk1.0-0 libasound2 libgbm1 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libxss1 lsb-release wget xdg-utils
+      - name: Render cloak images
+        run: |
+          node tools/render-svg.js images/cloak_with_logo.svg images/cloak_with_logo_2000.png 2000
+          node tools/render-svg.js images/cloak_with_logo_mono.svg images/cloak_with_logo_mono_2000.png 2000
+      - name: Upload images
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloak-pngs
+          path: |
+            images/cloak_with_logo_2000.png
+            images/cloak_with_logo_mono_2000.png
 name: Render Cloak PNG
 
 on:
