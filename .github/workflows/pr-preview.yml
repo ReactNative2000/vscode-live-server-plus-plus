@@ -27,25 +27,34 @@ jobs:
           # If you have a docs build step, add it here. This repo uses static files under docs/.
           echo "No build step configured; using docs/ as-is"
 
-      - name: Publish docs to gh-pages-preview branch
+      - name: Publish docs to gh-pages (previews path)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PREVIEW_BRANCH="gh-pages-preview/${{ github.event.pull_request.number }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Create an orphan branch containing the docs/ folder at the head
-          git worktree add /tmp/preview ${PREVIEW_BRANCH} || true
-          rm -rf /tmp/preview/* || true
-          cp -R docs/* /tmp/preview/ || true
-          cd /tmp/preview
-          git add --all
+          PREVIEW_PATH="previews/pr-${{ github.event.pull_request.number }}"
+          GIT_USER_NAME="github-actions[bot]"
+          GIT_USER_EMAIL="github-actions[bot]@users.noreply.github.com"
+
+          git config user.name "${GIT_USER_NAME}"
+          git config user.email "${GIT_USER_EMAIL}"
+
+          # Ensure gh-pages branch exists locally
+          git fetch origin gh-pages || true
+          git branch --list gh-pages || git checkout --orphan gh-pages
+          git checkout gh-pages
+
+          # Clear preview path and copy docs there
+          mkdir -p ${PREVIEW_PATH}
+          rm -rf ${PREVIEW_PATH}/* || true
+          cp -R docs/* ${PREVIEW_PATH}/ || true
+
+          git add ${PREVIEW_PATH}
           if git diff --quiet --cached; then
-            echo "No changes to publish for PR #${{ github.event.pull_request.number }}"
+            echo "No preview changes to publish for PR #${{ github.event.pull_request.number }}"
             exit 0
           fi
-          git commit -m "Preview: update docs for PR #${{ github.event.pull_request.number }}"
-          git push origin HEAD:${PREVIEW_BRANCH} --force
+          git commit -m "Preview: update ${PREVIEW_PATH} for PR #${{ github.event.pull_request.number }}"
+          git push origin gh-pages --force
 
       - name: Comment preview URL
         uses: actions/github-script@v7
@@ -53,11 +62,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request
-            const previewBranch = `gh-pages-preview/${pr.number}`
-            const url = `https://` + process.env.GITHUB_REPOSITORY.split('/')[0] + `.github.io/` + process.env.GITHUB_REPOSITORY.split('/')[1] + `/${previewBranch}/`
+            const previewPath = `previews/pr-${pr.number}`
+            const url = `https://` + process.env.GITHUB_REPOSITORY.split('/')[0] + `.github.io/` + process.env.GITHUB_REPOSITORY.split('/')[1] + `/${previewPath}/`
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pr.number,
-              body: `Docs preview published: ${url} (branch: ${previewBranch})`
+              body: `Docs preview published: ${url} (path: ${previewPath})`
             })
