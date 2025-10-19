@@ -1,0 +1,63 @@
+name: PR Preview (docs)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps (if any)
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+
+      - name: Build docs (no-op if not present)
+        run: |
+          # If you have a docs build step, add it here. This repo uses static files under docs/.
+          echo "No build step configured; using docs/ as-is"
+
+      - name: Publish docs to gh-pages-preview branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREVIEW_BRANCH="gh-pages-preview/${{ github.event.pull_request.number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Create an orphan branch containing the docs/ folder at the head
+          git worktree add /tmp/preview ${PREVIEW_BRANCH} || true
+          rm -rf /tmp/preview/* || true
+          cp -R docs/* /tmp/preview/ || true
+          cd /tmp/preview
+          git add --all
+          if git diff --quiet --cached; then
+            echo "No changes to publish for PR #${{ github.event.pull_request.number }}"
+            exit 0
+          fi
+          git commit -m "Preview: update docs for PR #${{ github.event.pull_request.number }}"
+          git push origin HEAD:${PREVIEW_BRANCH} --force
+
+      - name: Comment preview URL
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request
+            const previewBranch = `gh-pages-preview/${pr.number}`
+            const url = `https://` + process.env.GITHUB_REPOSITORY.split('/')[0] + `.github.io/` + process.env.GITHUB_REPOSITORY.split('/')[1] + `/${previewBranch}/`
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `Docs preview published: ${url} (branch: ${previewBranch})`
+            })
