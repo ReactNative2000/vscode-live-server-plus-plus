@@ -11,3 +11,7 @@ Contributors (generated):
 - brandonshelton195-collab <brandonshelton195@gmail.com> — 2 commits
 
 If you'd like a different name/email shown, update your Git author settings locally and push a small change, or open an issue and I can help.
+
+Additional profiles:
+
+- Brandon Shelton — ORCID: 0009-0001-8059-7200
