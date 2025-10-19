@@ -27,6 +27,7 @@ jobs:
           # If you have a docs build step, add it here. This repo uses static files under docs/.
           echo "No build step configured; using docs/ as-is"
 
+<<<<<<< HEAD
       - name: Publish docs to gh-pages (previews path)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,6 +56,27 @@ jobs:
           fi
           git commit -m "Preview: update ${PREVIEW_PATH} for PR #${{ github.event.pull_request.number }}"
           git push origin gh-pages --force
+=======
+      - name: Publish docs to gh-pages-preview branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREVIEW_BRANCH="gh-pages-preview/${{ github.event.pull_request.number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Create an orphan branch containing the docs/ folder at the head
+          git worktree add /tmp/preview ${PREVIEW_BRANCH} || true
+          rm -rf /tmp/preview/* || true
+          cp -R docs/* /tmp/preview/ || true
+          cd /tmp/preview
+          git add --all
+          if git diff --quiet --cached; then
+            echo "No changes to publish for PR #${{ github.event.pull_request.number }}"
+            exit 0
+          fi
+          git commit -m "Preview: update docs for PR #${{ github.event.pull_request.number }}"
+          git push origin HEAD:${PREVIEW_BRANCH} --force
+>>>>>>> 47e6b2a (ci(docs): add PR preview workflow to publish docs to gh-pages-preview)
 
       - name: Comment preview URL
         uses: actions/github-script@v7
@@ -62,11 +84,20 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request
+<<<<<<< HEAD
             const previewPath = `previews/pr-${pr.number}`
             const url = `https://` + process.env.GITHUB_REPOSITORY.split('/')[0] + `.github.io/` + process.env.GITHUB_REPOSITORY.split('/')[1] + `/${previewPath}/`
+=======
+            const previewBranch = `gh-pages-preview/${pr.number}`
+            const url = `https://` + process.env.GITHUB_REPOSITORY.split('/')[0] + `.github.io/` + process.env.GITHUB_REPOSITORY.split('/')[1] + `/${previewBranch}/`
+>>>>>>> 47e6b2a (ci(docs): add PR preview workflow to publish docs to gh-pages-preview)
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pr.number,
+<<<<<<< HEAD
               body: `Docs preview published: ${url} (path: ${previewPath})`
+=======
+              body: `Docs preview published: ${url} (branch: ${previewBranch})`
+>>>>>>> 47e6b2a (ci(docs): add PR preview workflow to publish docs to gh-pages-preview)
             })
