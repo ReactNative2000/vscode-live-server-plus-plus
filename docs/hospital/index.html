@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Inventory — Catalog</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;margin:16px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #ddd;text-align:left}th{background:#f4f6f8}</style>
+  <script>
+    async function load() {
+      const res = await fetch('/data/hospital_stock.json');
+      const items = await res.json();
+      const tbody = document.getElementById('tbody');
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${it.sku}</td><td>${it.name}</td><td>${it.category}</td><td>${it.quantity}</td><td>${it.location}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    window.addEventListener('DOMContentLoaded', load);
+  </script>
+</head>
+<body>
+  <h1>Hospital Inventory — Catalog</h1>
+  <p>Sample catalog. Generate data with <code>node tools/generate_hospital_stock.js</code> and serve the `data/` directory.</p>
+  <table>
+    <thead><tr><th>SKU</th><th>Name</th><th>Category</th><th>Qty</th><th>Location</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</body>
+</html>
