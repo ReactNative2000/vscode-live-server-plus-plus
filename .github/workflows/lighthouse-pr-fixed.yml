@@ -1,0 +1,81 @@
+name: Lighthouse (PR) - fixed
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install lighthouse + http-server
+        run: |
+          npm --no-audit --no-fund i -g lighthouse http-server || true
+
+      - name: Serve docs
+        run: |
+          npx http-server docs -p 8080 -c-1 &
+          for i in {1..10}; do
+            if curl -sSf http://127.0.0.1:8080/ > /dev/null; then
+              echo "server started" && break
+            fi
+            sleep 1
+          done
+
+      - name: Run Lighthouse
+        run: |
+          mkdir -p lighthouse
+          npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
+
+      - name: Evaluate thresholds
+        run: |
+          if [ -f .github/scripts/lh_thresholds.py ]; then
+            python3 .github/scripts/lh_thresholds.py
+          else
+            echo "Threshold script not found, skipping"
+          fi
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report-${{ github.event.pull_request.number }}
+          path: lighthouse
+
+      - name: Comment PR with summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs')
+            const pr = context.payload.pull_request
+            const jsonPath = 'lighthouse/report.report.json'
+            let body = 'Lighthouse report not found.'
+            if (fs.existsSync(jsonPath)) {
+              const report = JSON.parse(fs.readFileSync(jsonPath))
+              const categories = report.categories || {}
+              const lines = []
+              lines.push('## Lighthouse summary for this PR')
+              lines.push('')
+              for (const key of ['performance','accessibility','best-practices','seo']) {
+                if (categories[key]) {
+                  lines.push(`- **${key}**: ${Math.round(categories[key].score*100)}/100`)
+                }
+              }
+              lines.push('')
+              lines.push('Full HTML and JSON reports are attached as artifacts.')
+              body = lines.join('\n')
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body
+            })
