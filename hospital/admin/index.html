@@ -6,6 +6,12 @@
   <title>Hospital Admin</title>
   <style>body{font-family:Arial,Helvetica,sans-serif;margin:12px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}th{background:#f4f6f8}</style>
   <script>
+    function getAuthHeaders(){
+      const token = document.getElementById('admintoken')?.value || '';
+      const h = {'content-type':'application/json'};
+      if (token) h['authorization'] = 'Bearer ' + token;
+      return h;
+    }
     async function load() {
       const res = await fetch('/api/items');
       const items = await res.json();
@@ -17,13 +23,13 @@
       });
     }
     async function adjust(sku, delta) {
-      await fetch(`/api/items/${sku}/adjust`, {method:'POST',headers:{'content-type':'application/json'}, body: JSON.stringify({ delta })});
+      await fetch(`/api/items/${sku}/adjust`, {method:'POST',headers:getAuthHeaders(), body: JSON.stringify({ delta })});
       load();
     }
     async function importJson() {
       const raw = document.getElementById('jsondata').value;
       const j = JSON.parse(raw);
-      const res = await fetch('/api/items/import', {method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify(j)});
+      const res = await fetch('/api/items/import', {method:'POST',headers:getAuthHeaders(),body: JSON.stringify(j)});
       const out = await res.json();
       alert('Imported: '+(out.imported||0)); load();
     }
@@ -33,6 +39,7 @@
 <body>
   <h1>Hospital Admin</h1>
   <p>Paste JSON into the box and press Import to load sample data into the API.</p>
+  <p style="margin-bottom:8px">Admin token (optional): <input id="admintoken" placeholder="paste admin token here" style="width:260px" /></p>
   <textarea id="jsondata" style="width:100%;height:120px">[]</textarea>
   <p><button onclick="importJson()">Import JSON</button></p>
   <table>
