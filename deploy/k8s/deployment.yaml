@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lspp-server
+  labels:
+    app: lspp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lspp-server
+  template:
+    metadata:
+      labels:
+        app: lspp-server
+    spec:
+      containers:
+        - name: lspp-server
+          image: REPLACE_WITH_REGISTRY/lspp-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: lspp-config

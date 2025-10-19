@@ -1,0 +1,6 @@
+apiVersion: v2
+name: lspp-server
+description: Helm chart for Live Server++ SMS server
+type: application
+version: 0.1.0
+appVersion: "latest"

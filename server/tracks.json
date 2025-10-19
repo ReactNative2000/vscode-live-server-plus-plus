@@ -10,5 +10,13 @@
     "provider": "cashapp",
     "label": "Cash App test",
     "ts": 1697660000000
+  },
+  {
+    "type": "manual_cashapp",
+    "txn_id": "TESTTXN124",
+    "amount": 500,
+    "currency": "USD",
+    "note": "smoke test 2",
+    "ts": 1760890612322
   }
 ]

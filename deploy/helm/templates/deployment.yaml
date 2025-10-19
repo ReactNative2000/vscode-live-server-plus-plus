@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lspp-server.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "lspp-server.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "lspp-server.name" . }}
+    spec:
+      containers:
+        - name: {{ include "lspp-server.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: ADMIN_TOKEN
+              value: "{{ .Values.env.ADMIN_TOKEN }}"
