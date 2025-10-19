@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Cloak mockup with project logo">
+  <defs>
+    <clipPath id="emblem-clip">
+      <circle cx="400" cy="420" r="72" />
+    </clipPath>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f7f7f9"/>
+
+  <!-- Cloak body -->
+  <g transform="translate(0,0)">
+    <path d="M140 160 C 120 320, 160 520, 240 640 C 300 720, 500 720, 560 640 C 640 520, 680 320, 660 160 L 620 140 C 620 140, 520 220, 400 220 C 280 220, 180 140, 180 140 Z"
+          fill="#1f2a44" stroke="#111827" stroke-width="2"/>
+
+    <!-- Hood -->
+    <path d="M220 120 C 240 80, 320 60, 400 60 C 480 60, 560 80, 580 120 C 560 120, 520 100, 400 100 C 280 100, 240 120, 220 120 Z"
+          fill="#132034" stroke="#0b1624" stroke-width="2"/>
+
+    <!-- Inner highlight -->
+    <path d="M240 180 C 260 340, 300 520, 400 520 C 500 520, 540 340, 560 180"
+          fill="none" stroke="#2b3a5b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  </g>
+
+  <!-- Emblem background (circle) with subtle shadow -->
+  <g filter="url(#shadow)">
+    <circle cx="400" cy="420" r="78" fill="#ffffff" stroke="#e6e6e6" stroke-width="4" />
+  </g>
+
+  <!-- Logo placed inside the emblem via an <image> reference and clipped to the circle -->
+  <g clip-path="url(#emblem-clip)">
+    <!-- adjust href to use the repo image file: images/vscode-live-server-plus-plus.svg -->
+    <image href="/images/vscode-live-server-plus-plus.svg" x="336" y="348" width="128" height="128" preserveAspectRatio="xMidYMid meet" />
+  </g>
+
+  <!-- Optional caption -->
+  <text x="400" y="740" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#334155" text-anchor="middle">Cloak mockup — logo positioned on chest</text>
+
+</svg>
