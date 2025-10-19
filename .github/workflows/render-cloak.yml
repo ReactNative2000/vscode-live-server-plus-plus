@@ -1,7 +1,13 @@
-name: Render cloak SVGs
+name: Render Cloak PNGs
 
 on:
   workflow_dispatch:
+    inputs:
+      commit:
+        description: 'If true, commit the generated PNGs back to the current branch'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   render:
@@ -11,15 +17,21 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: Install dependencies
+          node-version: '18'
+      - name: Install deps
         run: npm ci
       - name: Install puppeteer dependencies
-        run: sudo apt-get update && sudo apt-get install -y ca-certificates fonts-liberation libatk-bridge2.0-0 libatk1.0-0 libasound2 libgbm1 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libxss1 lsb-release wget xdg-utils
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates fonts-liberation libatk-bridge2.0-0 libatk1.0-0 libasound2 libgbm1 libgtk-3-0 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libxss1 lsb-release wget xdg-utils
+      - name: Install puppeteer runtime
+        run: npm install puppeteer --no-save
       - name: Render cloak images
         run: |
           node tools/render-svg.js images/cloak_with_logo.svg images/cloak_with_logo_2000.png 2000
           node tools/render-svg.js images/cloak_with_logo_mono.svg images/cloak_with_logo_mono_2000.png 2000
+          node tools/render-svg.js images/cloak_with_name.svg images/cloak_with_name_2000.png 2000
+          node tools/render-svg.js images/cloak_with_name_mono.svg images/cloak_with_name_mono_2000.png 2000
       - name: Upload images
         uses: actions/upload-artifact@v4
         with:
@@ -27,48 +39,15 @@ jobs:
           path: |
             images/cloak_with_logo_2000.png
             images/cloak_with_logo_mono_2000.png
-name: Render Cloak PNG
-
-on:
-  workflow_dispatch:
-    inputs:
-      commit:
-        description: 'If true, commit the generated PNG back to the current branch'
-        required: false
-        default: 'false'
-
-jobs:
-  render:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install puppeteer
-        run: npm install puppeteer --no-save
-
-      - name: Render SVG to PNG
-        run: |
-          node tools/render-svg.js images/cloak_with_logo.svg images/cloak_with_logo_2000.png 2000
-
-      - name: Upload PNG artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cloak-png
-          path: images/cloak_with_logo_2000.png
-
-      - name: Commit and push PNG (optional)
+            images/cloak_with_name_2000.png
+            images/cloak_with_name_mono_2000.png
+      - name: Commit and push generated PNGs (optional)
         if: ${{ github.event.inputs.commit == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add images/cloak_with_logo_2000.png
-          git commit -m "feat(branding): add cloak PNG export 2000x2000 (via CI)" || echo "No changes to commit"
+          git add images/cloak_with_*_2000.png || true
+          git commit -m "feat(branding): add cloak PNG exports 2000x2000 (via CI)" || echo "No changes to commit"
           git push origin HEAD:${{ github.ref_name }}

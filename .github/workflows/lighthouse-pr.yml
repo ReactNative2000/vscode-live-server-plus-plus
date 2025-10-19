@@ -36,8 +36,7 @@ jobs:
           npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
 
       - name: Evaluate thresholds
-        run: |
-          python3 .github/scripts/lh_thresholds.py
+        run: python3 .github/scripts/lh_thresholds.py
 
       - name: Upload Lighthouse reports
         uses: actions/upload-artifact@v4
