@@ -2,18 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Courthouse — Templates & How‑to Guides for Official Notices</title>
-  <meta name="description" content="Printable templates, step-by-step instructions, and verification tips to prepare and send official notices and administrative requests." />
+  <meta name="description" content="Printable templates, short how-to guides, and verification tips to prepare and send administrative or legal notices." />
   <meta property="og:title" content="Courthouse — Templates & How‑to Guides" />
-  <meta property="og:description" content="Printable templates and step-by-step instructions to prepare official notices and requests." />
+  <meta property="og:description" content="Free, printable templates and step-by-step instructions to prepare official notices and requests." />
   <meta property="og:image" content="/images/cloak_with_name.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="stylesheet" href="/docs/courthouse/styles.css">
-  <!-- Analytics placeholder: replace with your Plausible or GA snippet -->
-  <!-- Plausible example: <script async defer data-domain="example.com" src="https://plausible.io/js/plausible.js"></script> -->
+
+  <!-- Analytics placeholder: add one snippet only. Example (Plausible):
+    <script async defer data-domain="example.com" src="https://plausible.io/js/plausible.js"></script>
+    Replace example.com with your site domain. Keep analytics privacy-friendly and document the choice in README. -->
+
+  <!-- Error monitoring placeholder (Sentry example):
+    <script src="https://browser.sentry-cdn.com/7.0.0/bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+      // Replace DSN with your Sentry project DSN
+      // Sentry.init({ dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0' });
+    </script>
+    If you enable monitoring, ensure you add a short privacy notice for visitors. -->
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="logo">
       <picture>
@@ -22,41 +33,80 @@
         <img src="/images/cloak_with_logo_mono.svg" alt="Courthouse logo" loading="lazy" />
       </picture>
     </div>
-    <h1>Courthouse — Templates & How‑to Guides for Official Notices</h1>
-    <p class="tagline">Download printable templates, follow step‑by‑step instructions, and send legally-sound notices with confidence.</p>
-    <p><a class="cta" href="#templates">Get a template</a></p>
+    <h1 id="site-title">Courthouse — Templates & How‑to Guides for Official Notices</h1>
+    <p class="tagline">Download printable templates, follow short step‑by‑step instructions, and send notices with confidence.</p>
+    <p>
+      <a class="cta" href="#templates" role="button">Get a template</a>
+      <a class="cta secondary" href="#quick-steps" role="button">How it works</a>
+    </p>
   </header>
 
   <main class="container">
+    <h2 id="main" class="sr-only">Main content</h2>
     <section>
       <h2>About</h2>
-      <p>This site provides free, easy-to-use templates and short guides to prepare administrative and legal notices. Use the templates as a starting point and customize them for your jurisdiction.</p>
+      <p>This site provides free, easy-to-use templates and short guides to prepare administrative and legal notices. Use the templates as a starting point and adapt them to your local jurisdiction and facts.</p>
     </section>
 
     <section>
       <h2>Templates</h2>
       <p id="templates">See <a href="/docs/courthouse/templates/notice.md">notice template</a> for a sample legal notice. More templates: <a href="/docs/courthouse/templates/">Templates index</a>.</p>
+      <ul>
+        <li><a href="/docs/courthouse/templates/notice.md">Notice (sample)</a></li>
+        <li><a href="/docs/courthouse/templates/formal-request.md">Formal request</a></li>
+        <li><a href="/docs/courthouse/templates/receipt.md">Delivery receipt</a></li>
+      </ul>
+    </section>
+
+    <section id="quick-steps">
+      <h2>Quick steps</h2>
+      <ol>
+        <li>Pick the template that most closely matches your need.</li>
+        <li>Customize names, dates, and facts; double-check jurisdictional references.</li>
+        <li>Print or create a PDF, sign where required, and deliver as instructed by the template.</li>
+        <li>Keep copies and proof of delivery (certified mail, courier receipt, email headers).</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="faq-title">
+      <h2 id="faq-title">FAQ</h2>
+      <details>
+        <summary>Are these templates legal advice?</summary>
+        <p>No. These templates are examples and do not replace legal advice. Consult a licensed attorney for legal questions.</p>
+      </details>
+      <details>
+        <summary>Can I use these in my country?</summary>
+        <p>Templates are general. Local rules vary—check local forms, filing fees, and service rules before using.</p>
+      </details>
     </section>
 
     <section>
       <h2>Contact</h2>
-      <p>Maintainers: see the repository <a href="/README.md">README</a>. For feedback or to report a problem, use the form below.</p>
-      <form action="https://formspree.io/f/{your-form-id}" method="POST" class="contact-form">
-        <label for="name">Name</label>
-        <input id="name" name="name" type="text" required />
+      <p>Maintainers: see the repository <a href="/README.md" rel="noopener">README</a>. For feedback or to report a problem, use the form below.</p>
+      <form action="https://formspree.io/f/{your-form-id}" method="POST" class="contact-form" aria-label="Feedback form">
+        <fieldset>
+          <legend class="sr-only">Feedback form</legend>
 
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" required />
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" aria-required="true" />
 
-        <label for="message">Message</label>
-        <textarea id="message" name="message" rows="4" required></textarea>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" aria-required="true" />
 
-        <!-- Honeypot field to reduce spam -->
-        <div style="display:none;"><input name="_gotcha" /></div>
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="4" aria-required="true"></textarea>
 
-        <button type="submit">Send feedback</button>
+          <!-- Honeypot field to reduce spam -->
+          <div style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+            <label for="_gotcha">Leave this field blank</label>
+            <input id="_gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <button type="submit">Send feedback</button>
+        </fieldset>
       </form>
       <p class="small">Or email: <a href="mailto:brandonshelton195@gmail.com">brandonshelton195@gmail.com</a></p>
+      <p class="small">We respect your privacy — feedback messages are used to improve templates and are not sold or shared.</p>
     </section>
   </main>
 
