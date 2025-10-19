@@ -100,6 +100,25 @@ if(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS){
   mailer = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: parseInt(process.env.SMTP_PORT||587,10), secure: process.env.SMTP_SECURE === '1', auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
 }
 
+// Load centralized cash config (falls back to embedded default)
+let cashConfig = { cashtag: '$brandon314314', utm: { source: 'repo', medium: 'docs', campaign: 'support' } };
+try{
+  const cfgPath = path.resolve(__dirname, '..', 'config', 'cash.json');
+  if(fs.existsSync(cfgPath)){
+    const raw = fs.readFileSync(cfgPath, 'utf8');
+    const parsed = JSON.parse(raw || '{}');
+    if(parsed && parsed.cashtag) cashConfig.cashtag = parsed.cashtag;
+    if(parsed && parsed.utm) cashConfig.utm = parsed.utm;
+  }
+}catch(e){ console.warn('Failed to load cash config', e && e.message); }
+
+// Helper to build a safe Cash App link from the configured cashtag
+function buildCashLink(){
+  const raw = (cashConfig && cashConfig.cashtag) ? String(cashConfig.cashtag) : '$brandon314314';
+  const plain = raw.replace(/^\$/,'');
+  return `https://cash.app/${encodeURIComponent(plain)}`;
+}
+
 // POST /send { to: "+1314..", path: "docs/job_example.txt" }
 app.post('/send', async (req, res) => {
   try{
@@ -196,6 +215,7 @@ app.post('/admin/applications/:id/approve', (req, res) => {
     if(err) return res.status(500).json({ error: err.message });
     // If approved, create a member row
     if(status === 'approved'){
+      const cashLink = buildCashLink();
       db.get('SELECT * FROM applications WHERE id = ?', [id], (e, row) => {
         if(e || !row) return res.json({ ok: true, changes: this.changes });
         const now = Date.now();
@@ -204,7 +224,7 @@ app.post('/admin/applications/:id/approve', (req, res) => {
           return res.json({ ok: true, changes: this.changes });
         });
       });
-    }else{
+    } else {
       res.json({ ok: true, changes: this.changes });
     }
   });
@@ -466,9 +486,9 @@ app.post('/admin/record-cashapp', requireAdmin, (req,res)=>{
     // insert into payments table; stripe_id stores txn_id for Cash App records
     db.run('INSERT INTO payments (stripe_id,amount,currency,member_id,created) VALUES (?,?,?,?,?)',[txn_id, parseInt(amount,10), currency||'USD', null, created], function(err){
       if(err) return res.status(500).json({ error: err.message });
-      const cashLink = 'https://cash.app/$brandon314314';
-      const amountDisplay = (parseInt(amount,10)/100).toFixed(2);
-      const msgText = `Manual Cash App recorded: $${amountDisplay} ${currency||'USD'} (txn ${txn_id}). Reconcile with ${cashLink}`;
+  const cashLink = buildCashLink();
+  const amountDisplay = (parseInt(amount,10)/100).toFixed(2);
+  const msgText = `Manual Cash App recorded: $${amountDisplay} ${currency||'USD'} (txn ${txn_id}). Reconcile with ${cashLink}`;
       // send SMS if configured
       try{
         const notifyTo = process.env.ADMIN_NOTIFY || process.env.TWILIO_TO || null;
@@ -591,9 +611,9 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
       }
 
       // Prepare notification message including Cash App link
-      const cashLink = 'https://cash.app/$brandon314314';
-      const amountDisplay = record.amount_total ? (record.amount_total/100).toFixed(2) : 'unknown';
-      const msgText = `Payment received: $${amountDisplay} ${record.currency || ''} (session ${record.id}). Reconcile or forward to Cash App: ${cashLink}`;
+  const cashLink = buildCashLink();
+  const amountDisplay = amount ? (amount/100).toFixed(2) : 'unknown';
+  const msgText = `Payment received: $${amountDisplay} ${currency || ''} (session ${stripeId}). Reconcile or forward to Cash App: ${cashLink}`;
 
       // Send SMS via Twilio if configured
       try{
