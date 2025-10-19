@@ -4,6 +4,18 @@ This repository contains a resilient student reflection form and supporting docu
 
 See `/docs` for usage, local testing, and admin tools.
 
+## Support
+
+If you'd like to support the project or the maintainer, you can buy a coffee:
+
+- [Buy Me a Coffee — brandonshel95](https://buymeacoffee.com/brandonshel95?utm_source=repo&utm_medium=docs&utm_campaign=support)
+
+You can also accept tips via Cash App using the cashtag `$brandon314314`:
+
+- [Cash App — $brandon314314](https://cash.app/$brandon314314?utm_source=repo&utm_medium=docs&utm_campaign=support)
+
+Thank you — every contribution helps maintain the project.
+
 ## GitHub Pages
 
 This repository includes a GitHub Actions workflow which publishes the `docs/` folder to the `gh-pages` branch. After a successful run the site will be available at `https://<owner>.github.io/<repo>` or at your configured custom domain.

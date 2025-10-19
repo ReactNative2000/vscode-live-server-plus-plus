@@ -1,0 +1,11 @@
+services:
+  lspp-server:
+    # Mount source for live-editing during development.
+    # We mount an anonymous volume for /usr/src/app/node_modules to avoid overwriting container-installed deps.
+    volumes:
+      - ./server:/usr/src/app:cached
+      - /usr/src/app/node_modules
+    environment:
+      - NODE_ENV=development
+    # Run the server from the mounted workdir
+    command: sh -c "cd /usr/src/app && npm start || node index.js"

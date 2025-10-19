@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: REPLACE_WITH_REGISTRY/lspp-server
+  pullPolicy: IfNotPresent
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  ADMIN_TOKEN: "changeme"

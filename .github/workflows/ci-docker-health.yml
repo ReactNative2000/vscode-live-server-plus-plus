@@ -1,0 +1,59 @@
+name: CI - Docker build & smoke
+
+on:
+  push:
+    branches: [ master ]
+    tags: ['v*', 'release-*']
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t lspp-server:ci -f server/Dockerfile .
+
+      - name: Run container
+        run: |
+          docker run -d --name lspp-server-ci -p 127.0.0.1:3001:3000 lspp-server:ci || docker ps -a
+
+      - name: Wait for server
+        run: |
+          for i in {1..20}; do
+            if curl -sS http://127.0.0.1:3001/health >/dev/null 2>&1; then echo ok && break; fi
+            sleep 1
+          done
+
+      - name: Smoke test /health
+        run: |
+          curl -fS http://127.0.0.1:3001/health
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker rm -f lspp-server-ci || true
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: build-and-smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo $GITHUB_TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push image
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/lspp-server:${TAG} -f server/Dockerfile .
+          docker push ghcr.io/${{ github.repository_owner }}/lspp-server:${TAG}

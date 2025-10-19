@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lspp-config
+data:
+  PORT: "3000"
+  # Non-secret example values. Place secrets in a Kubernetes Secret and reference them as envFrom or env.
+  ADMIN_TOKEN: "REPLACE_WITH_ADMIN_TOKEN"
