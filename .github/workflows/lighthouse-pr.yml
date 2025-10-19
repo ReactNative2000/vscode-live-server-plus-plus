@@ -17,6 +17,7 @@ jobs:
           node-version: '18'
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       - name: Install system deps (Chromium + Python)
         run: |
           sudo apt-get update
@@ -25,8 +26,68 @@ jobs:
 =======
 >>>>>>> 95b618a (ci(lighthouse): add threshold checker and clean Lighthouse PR workflow)
       - name: Install Lighthouse and http-server
+=======
+      - name: Serve docs
+>>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
         run: |
-          npm --no-audit --no-fund i -g lighthouse http-server || true
+          npx http-server docs -p 8080 -c-1 &
+          for i in {1..10}; do
+            if curl -sSf http://127.0.0.1:8080/ > /dev/null; then
+              echo "server started" && break
+            name: Lighthouse (PR)
+
+            on:
+              pull_request:
+                types: [opened, synchronize, reopened]
+
+            jobs:
+              lighthouse:
+                runs-on: ubuntu-latest
+                steps:
+                  - name: Checkout
+                    uses: actions/checkout@v4
+
+                  - name: Setup Node.js
+                    uses: actions/setup-node@v4
+                    with:
+                      node-version: '18'
+
+                  - name: Install Lighthouse and http-server
+                    run: |
+                      npm --no-audit --no-fund i -g lighthouse http-server || true
+
+                  - name: Serve docs
+                    run: |
+                      npx http-server docs -p 8080 -c-1 &
+                      for i in {1..10}; do
+                        if curl -sSf http://127.0.0.1:8080/ > /dev/null; then
+                          echo "server started" && break
+                        fi
+                        sleep 1
+                      done
+
+                  - name: Run Lighthouse (JSON + HTML)
+                    run: |
+                      mkdir -p lighthouse || true
+                      npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
+                      ls -lah lighthouse || true
+name: Lighthouse (PR)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
       - name: Install Python deps (PyYAML)
         run: |
@@ -55,6 +116,7 @@ jobs:
         run: |
           mkdir -p lighthouse || true
           npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
+<<<<<<< HEAD
 
       - name: Evaluate thresholds
 <<<<<<< HEAD
@@ -146,36 +208,17 @@ jobs:
           mkdir -p lighthouse || true
           # Run lighthouse and output JSON+HTML (report will be lighthouse/report.report.json and lighthouse/report.report.html)
           npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
+=======
+>>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
           ls -lah lighthouse || true
 
-      - name: Evaluate Lighthouse thresholds
+      - name: Evaluate thresholds
         run: |
-          python3 - <<'PY'
-import json,sys,os
-path='lighthouse/report.report.json'
-if not os.path.exists(path):
-    print('Lighthouse report not found, skipping threshold check')
-    sys.exit(0)
-with open(path,'r') as f:
-    report=json.load(f)
-categories=report.get('categories',{})
-scores={k: int(round(v.get('score',0)*100)) for k,v in categories.items()}
-print('Lighthouse scores:', scores)
-# Default thresholds; change these as needed
-thresholds={'performance':50,'accessibility':70,'best-practices':60,'seo':50}
-failures=[]
-for k,t in thresholds.items():
-    s=scores.get(k,0)
-    print(f"{k}: {s} (threshold {t})")
-    if s < t:
-        failures.append((k,s,t))
-if failures:
-    print('Thresholds not met:')
-    for k,s,t in failures:
-        print(f'- {k}: {s} < {t}')
-    sys.exit(2)
-print('All thresholds met')
-PY
+          if [ -f .github/scripts/lh_thresholds.py ]; then
+            python3 .github/scripts/lh_thresholds.py
+          else
+            echo "Threshold script not found, skipping"
+          fi
 
       - name: Upload Lighthouse reports
         uses: actions/upload-artifact@v4
@@ -213,22 +256,8 @@ PY
               issue_number: pr.number,
               body
             })
-name: Lighthouse (PR)
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-jobs:
-  lighthouse:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
+<<<<<<< HEAD
           node-version: '18'
 
       - name: Install Lighthouse (no global install)
@@ -774,3 +803,5 @@ jobs:
                                                               lines.push('Full HTML and JSON reports are attached as artifacts.')
 =======
 >>>>>>> 0c5d0cd (ci: add Lighthouse PR job to run Lighthouse and upload reports)
+=======
+>>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
