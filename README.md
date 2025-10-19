@@ -25,3 +25,11 @@ Quick steps:
 1. Push to `master` or `gh-pages` (or manually run the `Deploy GitHub Pages` workflow in Actions).
 2. Check Actions for a successful `Deploy GitHub Pages` run.
 3. Verify the Pages settings in the repository Settings → Pages and open the listed URL.
+
+## CI image publishing (GHCR)
+
+This project can optionally publish Docker images to GitHub Container Registry. See `docs/GHCR_SETUP.md` for setup steps and recommended token scopes.
+
+## Safety and firearms policy
+
+This project maintains a neutral safety policy regarding firearms and weapons. See `docs/FIREARMS_POLICY.md` for details on what content is allowed and how to report concerns.
