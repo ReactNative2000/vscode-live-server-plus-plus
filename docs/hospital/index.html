@@ -6,22 +6,55 @@
   <title>Hospital Inventory — Catalog</title>
   <style>body{font-family:Arial,Helvetica,sans-serif;margin:16px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #ddd;text-align:left}th{background:#f4f6f8}</style>
   <script>
+    let ITEMS = [];
     async function load() {
       const res = await fetch('/data/hospital_stock.json');
       const items = await res.json();
+      ITEMS = items;
+      populateCategories(items);
+      renderTable(items);
+    }
+
+    function populateCategories(items){
+      const sel = document.getElementById('category');
+      const cats = Array.from(new Set(items.map(i=>i.category).filter(Boolean))).sort();
+      cats.forEach(c=>{ const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+    }
+
+    function renderTable(items) {
       const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
       items.forEach(it => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${it.sku}</td><td>${it.name}</td><td>${it.category}</td><td>${it.quantity}</td><td>${it.location}</td>`;
         tbody.appendChild(tr);
       });
     }
+
+    function applyFilter() {
+      const q = document.getElementById('q').value.trim().toLowerCase();
+      const cat = document.getElementById('category').value;
+      let filtered = ITEMS.filter(i => {
+        const matchesQ = !q || i.sku.toLowerCase().includes(q) || i.name.toLowerCase().includes(q) || i.location.toLowerCase().includes(q);
+        const matchesCat = !cat || i.category === cat;
+        return matchesQ && matchesCat;
+      });
+      renderTable(filtered);
+    }
+
     window.addEventListener('DOMContentLoaded', load);
   </script>
 </head>
 <body>
   <h1>Hospital Inventory — Catalog</h1>
   <p>Sample catalog. Generate data with <code>node tools/generate_hospital_stock.js</code> and serve the `data/` directory.</p>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+    <input id="q" placeholder="Search SKU, name or location" style="flex:1;padding:8px" oninput="applyFilter()" />
+    <select id="category" onchange="applyFilter()">
+      <option value="">All categories</option>
+    </select>
+    <button onclick="applyFilter()">Filter</button>
+  </div>
   <table>
     <thead><tr><th>SKU</th><th>Name</th><th>Category</th><th>Qty</th><th>Location</th></tr></thead>
     <tbody id="tbody"></tbody>

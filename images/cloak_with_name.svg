@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 2000 2000">
+  <defs>
+    <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#6b4cff"/>
+      <stop offset="100%" stop-color="#2bb7ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="transparent"/>
+  <!-- simple cloak silhouette -->
+  <path d="M1000 180 C820 180 700 340 700 560 L700 1400 C700 1600 820 1760 1000 1760 C1180 1760 1300 1600 1300 1400 L1300 560 C1300 340 1180 180 1000 180 Z" fill="url(#g)" stroke="#1f1444" stroke-width="12"/>
+  <!-- collar -->
+  <path d="M860 420 Q1000 300 1140 420" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+  <!-- name plate -->
+  <rect x="700" y="1240" width="600" height="240" rx="28" ry="28" fill="#ffffff" opacity="0.9"/>
+  <text x="1000" y="1390" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="110" fill="#1f1444" text-anchor="middle" font-weight="700">YOUR NAME</text>
+</svg>

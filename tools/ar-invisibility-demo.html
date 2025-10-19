@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AR Invisibility Cloak Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:0;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px}
+    #video, canvas{border:1px solid #ccc;width:640px;height:480px;background:#000}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button{padding:8px 12px}
+    .status{font-size:0.9rem;color:#333}
+  </style>
+</head>
+<body>
+  <h2>AR Invisibility Cloak (web demo)</h2>
+  <div class="status">Tip: stand out from the background while you capture the background image.</div>
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="output" width="640" height="480"></canvas>
+
+  <div class="controls">
+    <button id="start">Start Camera</button>
+    <button id="captureBg">Capture Background</button>
+    <button id="toggle">Start Effect</button>
+    <button id="stop">Stop</button>
+  </div>
+
+  <p class="status" id="status">Model not loaded</p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.0.5/dist/body-pix.min.js"></script>
+  <script>
+    const video = document.getElementById('video');
+    const output = document.getElementById('output');
+    const ctxOut = output.getContext('2d');
+    const startBtn = document.getElementById('start');
+    const captureBtn = document.getElementById('captureBg');
+    const toggleBtn = document.getElementById('toggle');
+    const stopBtn = document.getElementById('stop');
+    const status = document.getElementById('status');
+
+    let net = null;
+    let streaming = false;
+    let running = false;
+    let bgImageData = null;
+
+    async function loadModel(){
+      status.textContent = 'Loading BodyPix model...';
+      net = await bodyPix.load({architecture: 'MobileNetV1', outputStride: 16, multiplier: 0.75});
+      status.textContent = 'Model loaded — start camera';
+    }
+
+    async function startCamera(){
+      if (streaming) return;
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({video:{width:640,height:480}, audio:false});
+        video.srcObject = stream;
+        await video.play();
+        streaming = true;
+        status.textContent = 'Camera running — capture background when nobody is in frame';
+      }catch(e){
+        status.textContent = 'Camera error: ' + e.message;
+        console.error(e);
+      }
+    }
+
+    function stopCamera(){
+      if (!streaming) return;
+      const s = video.srcObject;
+      if (s) {
+        s.getTracks().forEach(t=>t.stop());
+        video.srcObject = null;
+      }
+      streaming = false;
+      running = false;
+      status.textContent = 'Camera stopped';
+    }
+
+    function captureBackground(){
+      if (!streaming) { status.textContent = 'Start camera first'; return; }
+      const w = video.videoWidth || 640, h = video.videoHeight || 480;
+      const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(video, 0,0,w,h);
+      bgImageData = tctx.getImageData(0,0,w,h);
+      status.textContent = 'Background captured — press Start Effect';
+    }
+
+    async function processFrame(){
+      if (!running || !streaming || !net) return;
+      const w = output.width, h = output.height;
+      // draw current video frame to temp canvas
+      const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(video, 0,0,w,h);
+      const videoData = tctx.getImageData(0,0,w,h);
+
+      const segmentation = await net.segmentPerson(video, {internalResolution: 'medium', segmentationThreshold: 0.7});
+      const mask = segmentation.data; // Uint8 array (0/1 per pixel)
+
+      const out = ctxOut.createImageData(w,h);
+      const bg = bgImageData || videoData; // if no bg captured, use current frame (no effect)
+
+      for (let i=0, p=0; i<mask.length; i++, p+=4){
+        if (mask[i]){
+          // pixel belongs to person -> replace with background
+          out.data[p] = bg.data[p];
+          out.data[p+1] = bg.data[p+1];
+          out.data[p+2] = bg.data[p+2];
+          out.data[p+3] = 255;
+        } else {
+          // outside person -> show video
+          out.data[p] = videoData.data[p];
+          out.data[p+1] = videoData.data[p+1];
+          out.data[p+2] = videoData.data[p+2];
+          out.data[p+3] = 255;
+        }
+      }
+      ctxOut.putImageData(out, 0,0);
+      requestAnimationFrame(processFrame);
+    }
+
+    startBtn.addEventListener('click', startCamera);
+    captureBtn.addEventListener('click', captureBackground);
+    toggleBtn.addEventListener('click', ()=>{
+      if (!running){ running = true; toggleBtn.textContent = 'Stop Effect'; status.textContent = 'Effect running'; processFrame(); }
+      else { running = false; toggleBtn.textContent = 'Start Effect'; status.textContent = 'Effect stopped'; }
+    });
+    stopBtn.addEventListener('click', stopCamera);
+
+    loadModel();
+  </script>
+</body>
+</html>

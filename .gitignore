@@ -4,3 +4,4 @@ server/server.log
 server/node_modules/
 node_modules/
 out-*.zip
+node_modules
