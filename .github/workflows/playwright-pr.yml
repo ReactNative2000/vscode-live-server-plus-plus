@@ -30,6 +30,24 @@ jobs:
             fi
             sleep 1
           done
+      - name: Start hospital demo server
+        run: |
+          node server/hospital/index.js &
+          for i in {1..10}; do
+            if curl -sSf http://127.0.0.1:4001/api/items > /dev/null; then
+              echo "hospital started" && break
+            fi
+            sleep 1
+          done
+      - name: Start homicide demo server
+        run: |
+          node server/homicide/index.js &
+          for i in {1..10}; do
+            if curl -sSf http://127.0.0.1:5002/api/cases > /dev/null; then
+              echo "homicide started" && break
+            fi
+            sleep 1
+          done
 
       - name: Run Playwright tests
         working-directory: ./test/playwright

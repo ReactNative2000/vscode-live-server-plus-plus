@@ -57,6 +57,7 @@ jobs:
           npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
 
       - name: Evaluate thresholds
+<<<<<<< HEAD
         run: |
 <<<<<<< HEAD
           if [ -f .github/scripts/lh_thresholds.py ]; then
@@ -66,6 +67,9 @@ jobs:
           fi
 =======
           python3 .github/scripts/lh_thresholds.py
+=======
+        run: python3 .github/scripts/lh_thresholds.py
+>>>>>>> 797e098 (chore(docs/ci): fix markdown lint issues and clean CI workflows)
 
       - name: Upload Lighthouse reports
         uses: actions/upload-artifact@v4
