@@ -1,0 +1,6 @@
+Hospital Name: Central Community Hospital
+Address: 123 Main St, Hometown
+Phone: (555) 123-4567
+Services: Emergency, Pediatrics, Maternity
+
+Notes: We offer 24/7 emergency services and a small urgent care clinic.
