@@ -15,8 +15,23 @@ try {
 
 const DB_PATH = path.resolve(__dirname, 'hospital.db');
 const DB_JSON = path.resolve(__dirname, 'db.json');
+const cors = require('cors');
 const app = express();
 app.use(bodyParser.json());
+
+// CORS policy: permissive in local/dev (allows common localhost dev ports),
+// and configurable in production via ALLOWED_ORIGINS (comma-separated list).
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors()); // allow all origins in development for convenience
+} else {
+  const allowed = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (allowed.length) {
+    app.use(cors({ origin: allowed }));
+  }
+}
 
 function requireAdmin(req, res, next) {
   const token = process.env.ADMIN_TOKEN;

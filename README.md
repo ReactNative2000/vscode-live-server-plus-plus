@@ -16,6 +16,12 @@ You can also accept tips via Cash App using the cashtag `$brandon314314`:
 
 Thank you — every contribution helps maintain the project.
 
+## Author and researcher profile
+
+Find the maintainer's ORCID profile here:
+
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0001--8059--7200-brightgreen?style=flat)](https://orcid.org/0009-0001-8059-7200)
+
 ## GitHub Pages
 
 This repository includes a GitHub Actions workflow which publishes the `docs/` folder to the `gh-pages` branch. After a successful run the site will be available at `https://<owner>.github.io/<repo>` or at your configured custom domain.

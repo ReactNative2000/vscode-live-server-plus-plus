@@ -1,0 +1,37 @@
+name: Playwright E2E (PR)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install test deps
+        working-directory: ./test/playwright
+        run: |
+          npm ci
+
+      - name: Start docs server
+        run: |
+          npx http-server -p 8080 docs -c-1 &
+          for i in {1..10}; do
+            if curl -sSf http://127.0.0.1:8080/docs/courthouse/ > /dev/null; then
+              echo "server started" && break
+            fi
+            sleep 1
+          done
+
+      - name: Run Playwright tests
+        working-directory: ./test/playwright
+        run: |
+          npx playwright test --reporter=list
