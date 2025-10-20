@@ -119,13 +119,13 @@
     "cpx": "^1.5.0",
     "tslint": "^5.12.1",
     "typescript": "^3.3.1",
-    "vscode": "^1.1.28"
+    "vscode": "^1.1.37"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "mime-types": "^2.1.22",
     "open": "^6.1.0",
     "puppeteer": "^24.25.0",
-    "ws": "^6.2.1"
+    "ws": "^6.2.3"
   }
 }
