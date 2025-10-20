@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-TO="+13146197822"
+TO="${TWILIO_TO:-+13146197822}"
 DEFAULT_MSG="Hello from vscode-live-server-plus-plus — this is a test message."
 
 # Support -y/--yes to skip confirmation
