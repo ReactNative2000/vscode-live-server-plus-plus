@@ -26,7 +26,6 @@ jobs:
         run: |
           # If you have a docs build step, add it here. This repo uses static files under docs/.
           echo "No build step configured; using docs/ as-is"
-
       - name: Publish docs to gh-pages (previews path)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
