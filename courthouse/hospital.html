@@ -1,29 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Courthouse — Hospital demo integration</title>
-  <link rel="stylesheet" href="/docs/courthouse/styles.css">
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Courthouse — Hospital demo integration</title>
+	<link rel="stylesheet" href="/docs/courthouse/styles.css">
 </head>
 <body>
-  <main class="container">
-    <h1>Hospital demo — integration test</h1>
-    <p>This page demonstrates a lightweight integration between the Courthouse static site and the Hospital demo API.</p>
+	<nav class="demo-nav" aria-label="Demo navigation" style="padding:0.5rem;background:#f8f8f8;border-bottom:1px solid #eee;">
+		<div style="max-width:60rem;margin:0 auto;display:flex;gap:0.5rem;align-items:center;"> 
+			<a href="/docs/courthouse/">Courthouse home</a>
+			<span aria-hidden="true">|</span>
+			<a href="/docs/courthouse/hospital.html">Hospital demo</a>
+			<span aria-hidden="true">|</span>
+			<a href="/docs/courthouse/homicide.html">Homicide demo</a>
+		</div>
+	</nav>
+	<main class="container">
+		<h1>Hospital demo — integration test</h1>
+		<p>This page demonstrates a lightweight integration between the Courthouse static site and the Hospital demo API.</p>
 
-    <label for="api-base">Hospital API base URL</label>
-    <input id="api-base" type="url" value="http://localhost:4001" style="width:100%" />
+		<label for="api-base">Hospital API base URL</label>
+		<input id="api-base" type="url" value="http://localhost:4001" style="width:100%" />
 
-    <p>
-      <button id="load">Load items</button>
-      <button id="clear">Clear</button>
-    </p>
+		<p>
+			<button id="load">Load items</button>
+			<button id="clear">Clear</button>
+		</p>
 
-    <div id="status" aria-live="polite"></div>
-    <ul id="items"></ul>
+		<div id="status" aria-live="polite"></div>
+		<ul id="items"></ul>
 
-    <p class="small">Tip: run the hospital API (`server/hospital/index.js`) locally (port 4001) to fetch live demo data.</p>
-  </main>
-  <script src="./hospital.js"></script>
+		<p class="small">Tip: run the hospital API (`server/hospital/index.js`) locally (port 4001) to fetch live demo data.</p>
+	</main>
+	<script src="./hospital.js"></script>
 </body>
 </html>
