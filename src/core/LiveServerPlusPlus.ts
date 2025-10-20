@@ -167,7 +167,7 @@ export class LiveServerPlusPlus implements ILiveServerPlusPlus {
     return 'reload';
   }
 
-  private listenServer() {
+  private listenServer(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.cwd) {
         const error = new LSPPError('CWD is not defined', 'cwdUndefined');
@@ -187,7 +187,7 @@ export class LiveServerPlusPlus implements ILiveServerPlusPlus {
     });
   }
 
-  private closeServer() {
+  private closeServer(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.server!.close(err => {
         return err ? reject(err) : resolve();
@@ -196,7 +196,7 @@ export class LiveServerPlusPlus implements ILiveServerPlusPlus {
     });
   }
 
-  private closeWs() {
+  private closeWs(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.ws) return resolve();
       this.ws.close(err => (err ? reject(err) : resolve()));
@@ -322,8 +322,10 @@ export class LiveServerPlusPlus implements ILiveServerPlusPlus {
 
     fileStream.on('error', err => {
       console.error('ERROR ', err);
-      res.statusCode = err.code === 'ENOENT' ? 404 : 500;
-      return res.end(null);
+  const _err = err as NodeJS.ErrnoException | undefined;
+  const errno = _err && _err.code;
+  res.statusCode = errno === 'ENOENT' ? 404 : 500;
+      return res.end();
     });
   }
 }

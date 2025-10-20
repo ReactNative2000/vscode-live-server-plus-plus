@@ -1,0 +1,1802 @@
+[
+  {
+    "sku": "HSP00001",
+    "name": "PPE Item 1",
+    "category": "PPE",
+    "quantity": 126,
+    "reorder_level": 25,
+    "location": "Ward 6 - Shelf 6",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00002",
+    "name": "Equipment Item 2",
+    "category": "Equipment",
+    "quantity": 116,
+    "reorder_level": 23,
+    "location": "Ward 4 - Shelf 3",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00003",
+    "name": "Medication Item 3",
+    "category": "Medication",
+    "quantity": 31,
+    "reorder_level": 10,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00004",
+    "name": "Surgical Item 4",
+    "category": "Surgical",
+    "quantity": 134,
+    "reorder_level": 26,
+    "location": "Ward 6 - Shelf 1",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00005",
+    "name": "Diagnostics Item 5",
+    "category": "Diagnostics",
+    "quantity": 105,
+    "reorder_level": 21,
+    "location": "Ward 7 - Shelf 1",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00006",
+    "name": "Cleaning Item 6",
+    "category": "Cleaning",
+    "quantity": 109,
+    "reorder_level": 21,
+    "location": "Ward 6 - Shelf 3",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00007",
+    "name": "Office Item 7",
+    "category": "Office",
+    "quantity": 21,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 5",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00008",
+    "name": "Consumables Item 8",
+    "category": "Consumables",
+    "quantity": 158,
+    "reorder_level": 31,
+    "location": "Ward 3 - Shelf 1",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00009",
+    "name": "PPE Item 9",
+    "category": "PPE",
+    "quantity": 30,
+    "reorder_level": 10,
+    "location": "Ward 7 - Shelf 2",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00010",
+    "name": "Equipment Item 10",
+    "category": "Equipment",
+    "quantity": 132,
+    "reorder_level": 26,
+    "location": "Ward 9 - Shelf 2",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00011",
+    "name": "Medication Item 11",
+    "category": "Medication",
+    "quantity": 53,
+    "reorder_level": 10,
+    "location": "Ward 9 - Shelf 4",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00012",
+    "name": "Surgical Item 12",
+    "category": "Surgical",
+    "quantity": 82,
+    "reorder_level": 16,
+    "location": "Ward 7 - Shelf 2",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00013",
+    "name": "Diagnostics Item 13",
+    "category": "Diagnostics",
+    "quantity": 46,
+    "reorder_level": 10,
+    "location": "Ward 5 - Shelf 5",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00014",
+    "name": "Cleaning Item 14",
+    "category": "Cleaning",
+    "quantity": 106,
+    "reorder_level": 21,
+    "location": "Ward 4 - Shelf 1",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00015",
+    "name": "Office Item 15",
+    "category": "Office",
+    "quantity": 128,
+    "reorder_level": 25,
+    "location": "Ward 8 - Shelf 3",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00016",
+    "name": "Consumables Item 16",
+    "category": "Consumables",
+    "quantity": 135,
+    "reorder_level": 27,
+    "location": "Ward 10 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00017",
+    "name": "PPE Item 17",
+    "category": "PPE",
+    "quantity": 128,
+    "reorder_level": 25,
+    "location": "Ward 5 - Shelf 5",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00018",
+    "name": "Equipment Item 18",
+    "category": "Equipment",
+    "quantity": 66,
+    "reorder_level": 13,
+    "location": "Ward 6 - Shelf 2",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00019",
+    "name": "Medication Item 19",
+    "category": "Medication",
+    "quantity": 41,
+    "reorder_level": 10,
+    "location": "Ward 7 - Shelf 5",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00020",
+    "name": "Surgical Item 20",
+    "category": "Surgical",
+    "quantity": 195,
+    "reorder_level": 39,
+    "location": "Ward 9 - Shelf 1",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00021",
+    "name": "Diagnostics Item 21",
+    "category": "Diagnostics",
+    "quantity": 34,
+    "reorder_level": 10,
+    "location": "Ward 3 - Shelf 1",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00022",
+    "name": "Cleaning Item 22",
+    "category": "Cleaning",
+    "quantity": 60,
+    "reorder_level": 12,
+    "location": "Ward 4 - Shelf 1",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00023",
+    "name": "Office Item 23",
+    "category": "Office",
+    "quantity": 61,
+    "reorder_level": 12,
+    "location": "Ward 5 - Shelf 5",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00024",
+    "name": "Consumables Item 24",
+    "category": "Consumables",
+    "quantity": 77,
+    "reorder_level": 15,
+    "location": "Ward 7 - Shelf 6",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00025",
+    "name": "PPE Item 25",
+    "category": "PPE",
+    "quantity": 163,
+    "reorder_level": 32,
+    "location": "Ward 1 - Shelf 4",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00026",
+    "name": "Equipment Item 26",
+    "category": "Equipment",
+    "quantity": 25,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 2",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00027",
+    "name": "Medication Item 27",
+    "category": "Medication",
+    "quantity": 87,
+    "reorder_level": 17,
+    "location": "Ward 9 - Shelf 4",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00028",
+    "name": "Surgical Item 28",
+    "category": "Surgical",
+    "quantity": 74,
+    "reorder_level": 14,
+    "location": "Ward 6 - Shelf 5",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00029",
+    "name": "Diagnostics Item 29",
+    "category": "Diagnostics",
+    "quantity": 155,
+    "reorder_level": 31,
+    "location": "Ward 7 - Shelf 5",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00030",
+    "name": "Cleaning Item 30",
+    "category": "Cleaning",
+    "quantity": 51,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 3",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00031",
+    "name": "Office Item 31",
+    "category": "Office",
+    "quantity": 148,
+    "reorder_level": 29,
+    "location": "Ward 9 - Shelf 5",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00032",
+    "name": "Consumables Item 32",
+    "category": "Consumables",
+    "quantity": 38,
+    "reorder_level": 10,
+    "location": "Ward 3 - Shelf 5",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00033",
+    "name": "PPE Item 33",
+    "category": "PPE",
+    "quantity": 117,
+    "reorder_level": 23,
+    "location": "Ward 4 - Shelf 6",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00034",
+    "name": "Equipment Item 34",
+    "category": "Equipment",
+    "quantity": 22,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 2",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00035",
+    "name": "Medication Item 35",
+    "category": "Medication",
+    "quantity": 187,
+    "reorder_level": 37,
+    "location": "Ward 10 - Shelf 5",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00036",
+    "name": "Surgical Item 36",
+    "category": "Surgical",
+    "quantity": 133,
+    "reorder_level": 26,
+    "location": "Ward 3 - Shelf 2",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00037",
+    "name": "Diagnostics Item 37",
+    "category": "Diagnostics",
+    "quantity": 161,
+    "reorder_level": 32,
+    "location": "Ward 10 - Shelf 4",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00038",
+    "name": "Cleaning Item 38",
+    "category": "Cleaning",
+    "quantity": 14,
+    "reorder_level": 10,
+    "location": "Ward 4 - Shelf 6",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00039",
+    "name": "Office Item 39",
+    "category": "Office",
+    "quantity": 163,
+    "reorder_level": 32,
+    "location": "Ward 9 - Shelf 2",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00040",
+    "name": "Consumables Item 40",
+    "category": "Consumables",
+    "quantity": 47,
+    "reorder_level": 10,
+    "location": "Ward 5 - Shelf 6",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00041",
+    "name": "PPE Item 41",
+    "category": "PPE",
+    "quantity": 76,
+    "reorder_level": 15,
+    "location": "Ward 7 - Shelf 5",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00042",
+    "name": "Equipment Item 42",
+    "category": "Equipment",
+    "quantity": 166,
+    "reorder_level": 33,
+    "location": "Ward 7 - Shelf 2",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00043",
+    "name": "Medication Item 43",
+    "category": "Medication",
+    "quantity": 121,
+    "reorder_level": 24,
+    "location": "Ward 1 - Shelf 3",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00044",
+    "name": "Surgical Item 44",
+    "category": "Surgical",
+    "quantity": 66,
+    "reorder_level": 13,
+    "location": "Ward 7 - Shelf 5",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00045",
+    "name": "Diagnostics Item 45",
+    "category": "Diagnostics",
+    "quantity": 146,
+    "reorder_level": 29,
+    "location": "Ward 10 - Shelf 3",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00046",
+    "name": "Cleaning Item 46",
+    "category": "Cleaning",
+    "quantity": 69,
+    "reorder_level": 13,
+    "location": "Ward 3 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00047",
+    "name": "Office Item 47",
+    "category": "Office",
+    "quantity": 157,
+    "reorder_level": 31,
+    "location": "Ward 6 - Shelf 3",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00048",
+    "name": "Consumables Item 48",
+    "category": "Consumables",
+    "quantity": 198,
+    "reorder_level": 39,
+    "location": "Ward 9 - Shelf 3",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00049",
+    "name": "PPE Item 49",
+    "category": "PPE",
+    "quantity": 143,
+    "reorder_level": 28,
+    "location": "Ward 4 - Shelf 3",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00050",
+    "name": "Equipment Item 50",
+    "category": "Equipment",
+    "quantity": 3,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 3",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00051",
+    "name": "Medication Item 51",
+    "category": "Medication",
+    "quantity": 147,
+    "reorder_level": 29,
+    "location": "Ward 8 - Shelf 3",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00052",
+    "name": "Surgical Item 52",
+    "category": "Surgical",
+    "quantity": 178,
+    "reorder_level": 35,
+    "location": "Ward 10 - Shelf 4",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00053",
+    "name": "Diagnostics Item 53",
+    "category": "Diagnostics",
+    "quantity": 121,
+    "reorder_level": 24,
+    "location": "Ward 3 - Shelf 2",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00054",
+    "name": "Cleaning Item 54",
+    "category": "Cleaning",
+    "quantity": 100,
+    "reorder_level": 20,
+    "location": "Ward 8 - Shelf 2",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00055",
+    "name": "Office Item 55",
+    "category": "Office",
+    "quantity": 78,
+    "reorder_level": 15,
+    "location": "Ward 7 - Shelf 1",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00056",
+    "name": "Consumables Item 56",
+    "category": "Consumables",
+    "quantity": 36,
+    "reorder_level": 10,
+    "location": "Ward 9 - Shelf 1",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00057",
+    "name": "PPE Item 57",
+    "category": "PPE",
+    "quantity": 22,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 6",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00058",
+    "name": "Equipment Item 58",
+    "category": "Equipment",
+    "quantity": 37,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 4",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00059",
+    "name": "Medication Item 59",
+    "category": "Medication",
+    "quantity": 123,
+    "reorder_level": 24,
+    "location": "Ward 2 - Shelf 1",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00060",
+    "name": "Surgical Item 60",
+    "category": "Surgical",
+    "quantity": 52,
+    "reorder_level": 10,
+    "location": "Ward 6 - Shelf 5",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00061",
+    "name": "Diagnostics Item 61",
+    "category": "Diagnostics",
+    "quantity": 154,
+    "reorder_level": 30,
+    "location": "Ward 3 - Shelf 4",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00062",
+    "name": "Cleaning Item 62",
+    "category": "Cleaning",
+    "quantity": 152,
+    "reorder_level": 30,
+    "location": "Ward 3 - Shelf 1",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00063",
+    "name": "Office Item 63",
+    "category": "Office",
+    "quantity": 146,
+    "reorder_level": 29,
+    "location": "Ward 9 - Shelf 3",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00064",
+    "name": "Consumables Item 64",
+    "category": "Consumables",
+    "quantity": 145,
+    "reorder_level": 29,
+    "location": "Ward 1 - Shelf 5",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00065",
+    "name": "PPE Item 65",
+    "category": "PPE",
+    "quantity": 140,
+    "reorder_level": 28,
+    "location": "Ward 5 - Shelf 3",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00066",
+    "name": "Equipment Item 66",
+    "category": "Equipment",
+    "quantity": 69,
+    "reorder_level": 13,
+    "location": "Ward 9 - Shelf 2",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00067",
+    "name": "Medication Item 67",
+    "category": "Medication",
+    "quantity": 75,
+    "reorder_level": 15,
+    "location": "Ward 8 - Shelf 2",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00068",
+    "name": "Surgical Item 68",
+    "category": "Surgical",
+    "quantity": 55,
+    "reorder_level": 11,
+    "location": "Ward 5 - Shelf 2",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00069",
+    "name": "Diagnostics Item 69",
+    "category": "Diagnostics",
+    "quantity": 159,
+    "reorder_level": 31,
+    "location": "Ward 4 - Shelf 1",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00070",
+    "name": "Cleaning Item 70",
+    "category": "Cleaning",
+    "quantity": 152,
+    "reorder_level": 30,
+    "location": "Ward 1 - Shelf 4",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00071",
+    "name": "Office Item 71",
+    "category": "Office",
+    "quantity": 139,
+    "reorder_level": 27,
+    "location": "Ward 9 - Shelf 1",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00072",
+    "name": "Consumables Item 72",
+    "category": "Consumables",
+    "quantity": 42,
+    "reorder_level": 10,
+    "location": "Ward 3 - Shelf 3",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00073",
+    "name": "PPE Item 73",
+    "category": "PPE",
+    "quantity": 36,
+    "reorder_level": 10,
+    "location": "Ward 9 - Shelf 5",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00074",
+    "name": "Equipment Item 74",
+    "category": "Equipment",
+    "quantity": 173,
+    "reorder_level": 34,
+    "location": "Ward 3 - Shelf 6",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00075",
+    "name": "Medication Item 75",
+    "category": "Medication",
+    "quantity": 5,
+    "reorder_level": 10,
+    "location": "Ward 4 - Shelf 3",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00076",
+    "name": "Surgical Item 76",
+    "category": "Surgical",
+    "quantity": 56,
+    "reorder_level": 11,
+    "location": "Ward 6 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00077",
+    "name": "Diagnostics Item 77",
+    "category": "Diagnostics",
+    "quantity": 6,
+    "reorder_level": 10,
+    "location": "Ward 5 - Shelf 3",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00078",
+    "name": "Cleaning Item 78",
+    "category": "Cleaning",
+    "quantity": 120,
+    "reorder_level": 24,
+    "location": "Ward 10 - Shelf 6",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00079",
+    "name": "Office Item 79",
+    "category": "Office",
+    "quantity": 58,
+    "reorder_level": 11,
+    "location": "Ward 1 - Shelf 4",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00080",
+    "name": "Consumables Item 80",
+    "category": "Consumables",
+    "quantity": 57,
+    "reorder_level": 11,
+    "location": "Ward 7 - Shelf 2",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00081",
+    "name": "PPE Item 81",
+    "category": "PPE",
+    "quantity": 65,
+    "reorder_level": 13,
+    "location": "Ward 9 - Shelf 2",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00082",
+    "name": "Equipment Item 82",
+    "category": "Equipment",
+    "quantity": 12,
+    "reorder_level": 10,
+    "location": "Ward 7 - Shelf 2",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00083",
+    "name": "Medication Item 83",
+    "category": "Medication",
+    "quantity": 12,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 5",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00084",
+    "name": "Surgical Item 84",
+    "category": "Surgical",
+    "quantity": 165,
+    "reorder_level": 33,
+    "location": "Ward 3 - Shelf 2",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00085",
+    "name": "Diagnostics Item 85",
+    "category": "Diagnostics",
+    "quantity": 190,
+    "reorder_level": 38,
+    "location": "Ward 10 - Shelf 4",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00086",
+    "name": "Cleaning Item 86",
+    "category": "Cleaning",
+    "quantity": 111,
+    "reorder_level": 22,
+    "location": "Ward 10 - Shelf 4",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00087",
+    "name": "Office Item 87",
+    "category": "Office",
+    "quantity": 66,
+    "reorder_level": 13,
+    "location": "Ward 6 - Shelf 2",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00088",
+    "name": "Consumables Item 88",
+    "category": "Consumables",
+    "quantity": 63,
+    "reorder_level": 12,
+    "location": "Ward 4 - Shelf 5",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00089",
+    "name": "PPE Item 89",
+    "category": "PPE",
+    "quantity": 191,
+    "reorder_level": 38,
+    "location": "Ward 6 - Shelf 5",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00090",
+    "name": "Equipment Item 90",
+    "category": "Equipment",
+    "quantity": 112,
+    "reorder_level": 22,
+    "location": "Ward 9 - Shelf 2",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00091",
+    "name": "Medication Item 91",
+    "category": "Medication",
+    "quantity": 55,
+    "reorder_level": 11,
+    "location": "Ward 10 - Shelf 4",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00092",
+    "name": "Surgical Item 92",
+    "category": "Surgical",
+    "quantity": 3,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 2",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00093",
+    "name": "Diagnostics Item 93",
+    "category": "Diagnostics",
+    "quantity": 131,
+    "reorder_level": 26,
+    "location": "Ward 7 - Shelf 1",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00094",
+    "name": "Cleaning Item 94",
+    "category": "Cleaning",
+    "quantity": 15,
+    "reorder_level": 10,
+    "location": "Ward 6 - Shelf 4",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00095",
+    "name": "Office Item 95",
+    "category": "Office",
+    "quantity": 154,
+    "reorder_level": 30,
+    "location": "Ward 8 - Shelf 1",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00096",
+    "name": "Consumables Item 96",
+    "category": "Consumables",
+    "quantity": 8,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00097",
+    "name": "PPE Item 97",
+    "category": "PPE",
+    "quantity": 47,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 4",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00098",
+    "name": "Equipment Item 98",
+    "category": "Equipment",
+    "quantity": 176,
+    "reorder_level": 35,
+    "location": "Ward 6 - Shelf 4",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00099",
+    "name": "Medication Item 99",
+    "category": "Medication",
+    "quantity": 31,
+    "reorder_level": 10,
+    "location": "Ward 3 - Shelf 2",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00100",
+    "name": "Surgical Item 100",
+    "category": "Surgical",
+    "quantity": 151,
+    "reorder_level": 30,
+    "location": "Ward 10 - Shelf 1",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00101",
+    "name": "Diagnostics Item 101",
+    "category": "Diagnostics",
+    "quantity": 51,
+    "reorder_level": 10,
+    "location": "Ward 5 - Shelf 3",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00102",
+    "name": "Cleaning Item 102",
+    "category": "Cleaning",
+    "quantity": 101,
+    "reorder_level": 20,
+    "location": "Ward 5 - Shelf 1",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00103",
+    "name": "Office Item 103",
+    "category": "Office",
+    "quantity": 91,
+    "reorder_level": 18,
+    "location": "Ward 7 - Shelf 1",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00104",
+    "name": "Consumables Item 104",
+    "category": "Consumables",
+    "quantity": 186,
+    "reorder_level": 37,
+    "location": "Ward 9 - Shelf 4",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00105",
+    "name": "PPE Item 105",
+    "category": "PPE",
+    "quantity": 22,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 5",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00106",
+    "name": "Equipment Item 106",
+    "category": "Equipment",
+    "quantity": 161,
+    "reorder_level": 32,
+    "location": "Ward 2 - Shelf 4",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00107",
+    "name": "Medication Item 107",
+    "category": "Medication",
+    "quantity": 39,
+    "reorder_level": 10,
+    "location": "Ward 2 - Shelf 1",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00108",
+    "name": "Surgical Item 108",
+    "category": "Surgical",
+    "quantity": 132,
+    "reorder_level": 26,
+    "location": "Ward 8 - Shelf 1",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00109",
+    "name": "Diagnostics Item 109",
+    "category": "Diagnostics",
+    "quantity": 13,
+    "reorder_level": 10,
+    "location": "Ward 4 - Shelf 1",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00110",
+    "name": "Cleaning Item 110",
+    "category": "Cleaning",
+    "quantity": 76,
+    "reorder_level": 15,
+    "location": "Ward 3 - Shelf 4",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00111",
+    "name": "Office Item 111",
+    "category": "Office",
+    "quantity": 58,
+    "reorder_level": 11,
+    "location": "Ward 3 - Shelf 3",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00112",
+    "name": "Consumables Item 112",
+    "category": "Consumables",
+    "quantity": 33,
+    "reorder_level": 10,
+    "location": "Ward 5 - Shelf 6",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00113",
+    "name": "PPE Item 113",
+    "category": "PPE",
+    "quantity": 194,
+    "reorder_level": 38,
+    "location": "Ward 1 - Shelf 5",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00114",
+    "name": "Equipment Item 114",
+    "category": "Equipment",
+    "quantity": 122,
+    "reorder_level": 24,
+    "location": "Ward 2 - Shelf 6",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00115",
+    "name": "Medication Item 115",
+    "category": "Medication",
+    "quantity": 200,
+    "reorder_level": 40,
+    "location": "Ward 10 - Shelf 2",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00116",
+    "name": "Surgical Item 116",
+    "category": "Surgical",
+    "quantity": 135,
+    "reorder_level": 27,
+    "location": "Ward 8 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00117",
+    "name": "Diagnostics Item 117",
+    "category": "Diagnostics",
+    "quantity": 46,
+    "reorder_level": 10,
+    "location": "Ward 6 - Shelf 3",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00118",
+    "name": "Cleaning Item 118",
+    "category": "Cleaning",
+    "quantity": 52,
+    "reorder_level": 10,
+    "location": "Ward 6 - Shelf 3",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00119",
+    "name": "Office Item 119",
+    "category": "Office",
+    "quantity": 132,
+    "reorder_level": 26,
+    "location": "Ward 1 - Shelf 6",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00120",
+    "name": "Consumables Item 120",
+    "category": "Consumables",
+    "quantity": 96,
+    "reorder_level": 19,
+    "location": "Ward 10 - Shelf 1",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00121",
+    "name": "PPE Item 121",
+    "category": "PPE",
+    "quantity": 80,
+    "reorder_level": 16,
+    "location": "Ward 2 - Shelf 6",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00122",
+    "name": "Equipment Item 122",
+    "category": "Equipment",
+    "quantity": 178,
+    "reorder_level": 35,
+    "location": "Ward 6 - Shelf 1",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00123",
+    "name": "Medication Item 123",
+    "category": "Medication",
+    "quantity": 199,
+    "reorder_level": 39,
+    "location": "Ward 5 - Shelf 1",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00124",
+    "name": "Surgical Item 124",
+    "category": "Surgical",
+    "quantity": 18,
+    "reorder_level": 10,
+    "location": "Ward 4 - Shelf 2",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00125",
+    "name": "Diagnostics Item 125",
+    "category": "Diagnostics",
+    "quantity": 163,
+    "reorder_level": 32,
+    "location": "Ward 2 - Shelf 4",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00126",
+    "name": "Cleaning Item 126",
+    "category": "Cleaning",
+    "quantity": 106,
+    "reorder_level": 21,
+    "location": "Ward 9 - Shelf 4",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00127",
+    "name": "Office Item 127",
+    "category": "Office",
+    "quantity": 128,
+    "reorder_level": 25,
+    "location": "Ward 2 - Shelf 6",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00128",
+    "name": "Consumables Item 128",
+    "category": "Consumables",
+    "quantity": 148,
+    "reorder_level": 29,
+    "location": "Ward 8 - Shelf 1",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00129",
+    "name": "PPE Item 129",
+    "category": "PPE",
+    "quantity": 118,
+    "reorder_level": 23,
+    "location": "Ward 9 - Shelf 3",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00130",
+    "name": "Equipment Item 130",
+    "category": "Equipment",
+    "quantity": 60,
+    "reorder_level": 12,
+    "location": "Ward 3 - Shelf 4",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00131",
+    "name": "Medication Item 131",
+    "category": "Medication",
+    "quantity": 156,
+    "reorder_level": 31,
+    "location": "Ward 9 - Shelf 2",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00132",
+    "name": "Surgical Item 132",
+    "category": "Surgical",
+    "quantity": 36,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 6",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00133",
+    "name": "Diagnostics Item 133",
+    "category": "Diagnostics",
+    "quantity": 73,
+    "reorder_level": 14,
+    "location": "Ward 3 - Shelf 6",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00134",
+    "name": "Cleaning Item 134",
+    "category": "Cleaning",
+    "quantity": 176,
+    "reorder_level": 35,
+    "location": "Ward 2 - Shelf 4",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00135",
+    "name": "Office Item 135",
+    "category": "Office",
+    "quantity": 157,
+    "reorder_level": 31,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00136",
+    "name": "Consumables Item 136",
+    "category": "Consumables",
+    "quantity": 166,
+    "reorder_level": 33,
+    "location": "Ward 7 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00137",
+    "name": "PPE Item 137",
+    "category": "PPE",
+    "quantity": 105,
+    "reorder_level": 21,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00138",
+    "name": "Equipment Item 138",
+    "category": "Equipment",
+    "quantity": 56,
+    "reorder_level": 11,
+    "location": "Ward 7 - Shelf 3",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00139",
+    "name": "Medication Item 139",
+    "category": "Medication",
+    "quantity": 162,
+    "reorder_level": 32,
+    "location": "Ward 5 - Shelf 3",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00140",
+    "name": "Surgical Item 140",
+    "category": "Surgical",
+    "quantity": 89,
+    "reorder_level": 17,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00141",
+    "name": "Diagnostics Item 141",
+    "category": "Diagnostics",
+    "quantity": 11,
+    "reorder_level": 10,
+    "location": "Ward 9 - Shelf 5",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00142",
+    "name": "Cleaning Item 142",
+    "category": "Cleaning",
+    "quantity": 93,
+    "reorder_level": 18,
+    "location": "Ward 8 - Shelf 1",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00143",
+    "name": "Office Item 143",
+    "category": "Office",
+    "quantity": 81,
+    "reorder_level": 16,
+    "location": "Ward 2 - Shelf 4",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00144",
+    "name": "Consumables Item 144",
+    "category": "Consumables",
+    "quantity": 6,
+    "reorder_level": 10,
+    "location": "Ward 5 - Shelf 3",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00145",
+    "name": "PPE Item 145",
+    "category": "PPE",
+    "quantity": 173,
+    "reorder_level": 34,
+    "location": "Ward 5 - Shelf 6",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00146",
+    "name": "Equipment Item 146",
+    "category": "Equipment",
+    "quantity": 1,
+    "reorder_level": 10,
+    "location": "Ward 6 - Shelf 3",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00147",
+    "name": "Medication Item 147",
+    "category": "Medication",
+    "quantity": 87,
+    "reorder_level": 17,
+    "location": "Ward 3 - Shelf 6",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00148",
+    "name": "Surgical Item 148",
+    "category": "Surgical",
+    "quantity": 77,
+    "reorder_level": 15,
+    "location": "Ward 3 - Shelf 2",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00149",
+    "name": "Diagnostics Item 149",
+    "category": "Diagnostics",
+    "quantity": 76,
+    "reorder_level": 15,
+    "location": "Ward 6 - Shelf 4",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00150",
+    "name": "Cleaning Item 150",
+    "category": "Cleaning",
+    "quantity": 114,
+    "reorder_level": 22,
+    "location": "Ward 3 - Shelf 6",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00151",
+    "name": "Office Item 151",
+    "category": "Office",
+    "quantity": 199,
+    "reorder_level": 39,
+    "location": "Ward 7 - Shelf 3",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00152",
+    "name": "Consumables Item 152",
+    "category": "Consumables",
+    "quantity": 171,
+    "reorder_level": 34,
+    "location": "Ward 3 - Shelf 5",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00153",
+    "name": "PPE Item 153",
+    "category": "PPE",
+    "quantity": 139,
+    "reorder_level": 27,
+    "location": "Ward 5 - Shelf 2",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00154",
+    "name": "Equipment Item 154",
+    "category": "Equipment",
+    "quantity": 65,
+    "reorder_level": 13,
+    "location": "Ward 10 - Shelf 3",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00155",
+    "name": "Medication Item 155",
+    "category": "Medication",
+    "quantity": 129,
+    "reorder_level": 25,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00156",
+    "name": "Surgical Item 156",
+    "category": "Surgical",
+    "quantity": 191,
+    "reorder_level": 38,
+    "location": "Ward 1 - Shelf 6",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00157",
+    "name": "Diagnostics Item 157",
+    "category": "Diagnostics",
+    "quantity": 48,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 6",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00158",
+    "name": "Cleaning Item 158",
+    "category": "Cleaning",
+    "quantity": 86,
+    "reorder_level": 17,
+    "location": "Ward 10 - Shelf 3",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00159",
+    "name": "Office Item 159",
+    "category": "Office",
+    "quantity": 96,
+    "reorder_level": 19,
+    "location": "Ward 6 - Shelf 4",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00160",
+    "name": "Consumables Item 160",
+    "category": "Consumables",
+    "quantity": 5,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 5",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00161",
+    "name": "PPE Item 161",
+    "category": "PPE",
+    "quantity": 1,
+    "reorder_level": 10,
+    "location": "Ward 6 - Shelf 6",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00162",
+    "name": "Equipment Item 162",
+    "category": "Equipment",
+    "quantity": 16,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 4",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00163",
+    "name": "Medication Item 163",
+    "category": "Medication",
+    "quantity": 102,
+    "reorder_level": 20,
+    "location": "Ward 4 - Shelf 6",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00164",
+    "name": "Surgical Item 164",
+    "category": "Surgical",
+    "quantity": 5,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 6",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00165",
+    "name": "Diagnostics Item 165",
+    "category": "Diagnostics",
+    "quantity": 194,
+    "reorder_level": 38,
+    "location": "Ward 1 - Shelf 2",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00166",
+    "name": "Cleaning Item 166",
+    "category": "Cleaning",
+    "quantity": 126,
+    "reorder_level": 25,
+    "location": "Ward 2 - Shelf 1",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00167",
+    "name": "Office Item 167",
+    "category": "Office",
+    "quantity": 64,
+    "reorder_level": 12,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00168",
+    "name": "Consumables Item 168",
+    "category": "Consumables",
+    "quantity": 164,
+    "reorder_level": 32,
+    "location": "Ward 10 - Shelf 6",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00169",
+    "name": "PPE Item 169",
+    "category": "PPE",
+    "quantity": 11,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 2",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00170",
+    "name": "Equipment Item 170",
+    "category": "Equipment",
+    "quantity": 163,
+    "reorder_level": 32,
+    "location": "Ward 5 - Shelf 5",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00171",
+    "name": "Medication Item 171",
+    "category": "Medication",
+    "quantity": 59,
+    "reorder_level": 11,
+    "location": "Ward 7 - Shelf 6",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00172",
+    "name": "Surgical Item 172",
+    "category": "Surgical",
+    "quantity": 193,
+    "reorder_level": 38,
+    "location": "Ward 3 - Shelf 3",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00173",
+    "name": "Diagnostics Item 173",
+    "category": "Diagnostics",
+    "quantity": 96,
+    "reorder_level": 19,
+    "location": "Ward 4 - Shelf 2",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00174",
+    "name": "Cleaning Item 174",
+    "category": "Cleaning",
+    "quantity": 166,
+    "reorder_level": 33,
+    "location": "Ward 4 - Shelf 1",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00175",
+    "name": "Office Item 175",
+    "category": "Office",
+    "quantity": 182,
+    "reorder_level": 36,
+    "location": "Ward 2 - Shelf 2",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00176",
+    "name": "Consumables Item 176",
+    "category": "Consumables",
+    "quantity": 6,
+    "reorder_level": 10,
+    "location": "Ward 3 - Shelf 2",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00177",
+    "name": "PPE Item 177",
+    "category": "PPE",
+    "quantity": 39,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 1",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00178",
+    "name": "Equipment Item 178",
+    "category": "Equipment",
+    "quantity": 83,
+    "reorder_level": 16,
+    "location": "Ward 3 - Shelf 3",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00179",
+    "name": "Medication Item 179",
+    "category": "Medication",
+    "quantity": 22,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 3",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00180",
+    "name": "Surgical Item 180",
+    "category": "Surgical",
+    "quantity": 80,
+    "reorder_level": 16,
+    "location": "Ward 10 - Shelf 5",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00181",
+    "name": "Diagnostics Item 181",
+    "category": "Diagnostics",
+    "quantity": 10,
+    "reorder_level": 10,
+    "location": "Ward 2 - Shelf 5",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00182",
+    "name": "Cleaning Item 182",
+    "category": "Cleaning",
+    "quantity": 136,
+    "reorder_level": 27,
+    "location": "Ward 6 - Shelf 4",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00183",
+    "name": "Office Item 183",
+    "category": "Office",
+    "quantity": 177,
+    "reorder_level": 35,
+    "location": "Ward 7 - Shelf 4",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00184",
+    "name": "Consumables Item 184",
+    "category": "Consumables",
+    "quantity": 52,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 3",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00185",
+    "name": "PPE Item 185",
+    "category": "PPE",
+    "quantity": 162,
+    "reorder_level": 32,
+    "location": "Ward 5 - Shelf 6",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00186",
+    "name": "Equipment Item 186",
+    "category": "Equipment",
+    "quantity": 91,
+    "reorder_level": 18,
+    "location": "Ward 3 - Shelf 5",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00187",
+    "name": "Medication Item 187",
+    "category": "Medication",
+    "quantity": 96,
+    "reorder_level": 19,
+    "location": "Ward 3 - Shelf 4",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00188",
+    "name": "Surgical Item 188",
+    "category": "Surgical",
+    "quantity": 46,
+    "reorder_level": 10,
+    "location": "Ward 4 - Shelf 2",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00189",
+    "name": "Diagnostics Item 189",
+    "category": "Diagnostics",
+    "quantity": 65,
+    "reorder_level": 13,
+    "location": "Ward 10 - Shelf 5",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00190",
+    "name": "Cleaning Item 190",
+    "category": "Cleaning",
+    "quantity": 102,
+    "reorder_level": 20,
+    "location": "Ward 8 - Shelf 1",
+    "supplier": "Supplier 1"
+  },
+  {
+    "sku": "HSP00191",
+    "name": "Office Item 191",
+    "category": "Office",
+    "quantity": 24,
+    "reorder_level": 10,
+    "location": "Ward 10 - Shelf 5",
+    "supplier": "Supplier 2"
+  },
+  {
+    "sku": "HSP00192",
+    "name": "Consumables Item 192",
+    "category": "Consumables",
+    "quantity": 13,
+    "reorder_level": 10,
+    "location": "Ward 1 - Shelf 5",
+    "supplier": "Supplier 3"
+  },
+  {
+    "sku": "HSP00193",
+    "name": "PPE Item 193",
+    "category": "PPE",
+    "quantity": 24,
+    "reorder_level": 10,
+    "location": "Ward 8 - Shelf 6",
+    "supplier": "Supplier 4"
+  },
+  {
+    "sku": "HSP00194",
+    "name": "Equipment Item 194",
+    "category": "Equipment",
+    "quantity": 111,
+    "reorder_level": 22,
+    "location": "Ward 3 - Shelf 1",
+    "supplier": "Supplier 5"
+  },
+  {
+    "sku": "HSP00195",
+    "name": "Medication Item 195",
+    "category": "Medication",
+    "quantity": 31,
+    "reorder_level": 10,
+    "location": "Ward 9 - Shelf 3",
+    "supplier": "Supplier 6"
+  },
+  {
+    "sku": "HSP00196",
+    "name": "Surgical Item 196",
+    "category": "Surgical",
+    "quantity": 106,
+    "reorder_level": 21,
+    "location": "Ward 5 - Shelf 6",
+    "supplier": "Supplier 7"
+  },
+  {
+    "sku": "HSP00197",
+    "name": "Diagnostics Item 197",
+    "category": "Diagnostics",
+    "quantity": 200,
+    "reorder_level": 40,
+    "location": "Ward 4 - Shelf 4",
+    "supplier": "Supplier 8"
+  },
+  {
+    "sku": "HSP00198",
+    "name": "Cleaning Item 198",
+    "category": "Cleaning",
+    "quantity": 97,
+    "reorder_level": 19,
+    "location": "Ward 2 - Shelf 6",
+    "supplier": "Supplier 9"
+  },
+  {
+    "sku": "HSP00199",
+    "name": "Office Item 199",
+    "category": "Office",
+    "quantity": 137,
+    "reorder_level": 27,
+    "location": "Ward 9 - Shelf 6",
+    "supplier": "Supplier 10"
+  },
+  {
+    "sku": "HSP00200",
+    "name": "Consumables Item 200",
+    "category": "Consumables",
+    "quantity": 165,
+    "reorder_level": 33,
+    "location": "Ward 3 - Shelf 1",
+    "supplier": "Supplier 1"
+  }
+]
