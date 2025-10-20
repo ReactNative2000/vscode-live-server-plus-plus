@@ -7,9 +7,18 @@
   <link rel="stylesheet" href="/docs/courthouse/styles.css">
 </head>
 <body>
+  <nav class="demo-nav" aria-label="Demo navigation" style="padding:0.5rem;background:#f8f8f8;border-bottom:1px solid #eee;">
+    <div style="max-width:60rem;margin:0 auto;display:flex;gap:0.5rem;align-items:center;"> 
+      <a href="/docs/courthouse/">Courthouse home</a>
+      <span aria-hidden="true">|</span>
+      <a href="/docs/courthouse/hospital.html">Hospital demo</a>
+      <span aria-hidden="true">|</span>
+      <a href="/docs/courthouse/homicide.html">Homicide demo</a>
+    </div>
+  </nav>
   <main class="container">
     <h1>Homicide demo — integration test</h1>
-    <p>This page demonstrates a lightweight integration between the Courthouse static site and a Homicide demo API.</p>
+    <p>This page demonstrates a lightweight integration between the Courthouse static site and the Homicide demo API.</p>
 
     <label for="api-base">Homicide API base URL</label>
     <input id="api-base" type="url" value="http://localhost:5002" style="width:100%" />
@@ -22,7 +31,7 @@
     <div id="status" aria-live="polite"></div>
     <ul id="items"></ul>
 
-    <p class="small">Tip: run the Homicide API locally (e.g. `server/homicide/index.js`) on port 5002 to fetch live demo data.</p>
+    <p class="small">Tip: run the homicide API (`server/homicide/index.js`) locally (port 5002) to fetch live demo data.</p>
   </main>
   <script src="./homicide.js"></script>
 </body>
