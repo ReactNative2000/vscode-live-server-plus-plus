@@ -18,6 +18,7 @@ jobs:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       - name: Install system deps (Chromium + Python)
         run: |
           sudo apt-get update
@@ -27,6 +28,12 @@ jobs:
 >>>>>>> 95b618a (ci(lighthouse): add threshold checker and clean Lighthouse PR workflow)
       - name: Install Lighthouse and http-server
 =======
+=======
+      - name: Install lighthouse + http-server
+        run: |
+          npm --no-audit --no-fund i -g lighthouse http-server || true
+
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
       - name: Serve docs
 >>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
         run: |
@@ -34,43 +41,59 @@ jobs:
           for i in {1..10}; do
             if curl -sSf http://127.0.0.1:8080/ > /dev/null; then
               echo "server started" && break
-            name: Lighthouse (PR)
+            fi
+            sleep 1
+          done
 
-            on:
-              pull_request:
-                types: [opened, synchronize, reopened]
+      - name: Run Lighthouse
+        run: |
+          mkdir -p lighthouse
+          npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
 
-            jobs:
-              lighthouse:
-                runs-on: ubuntu-latest
-                steps:
-                  - name: Checkout
-                    uses: actions/checkout@v4
+      - name: Evaluate thresholds
+        run: |
+          if [ -f .github/scripts/lh_thresholds.py ]; then
+            python3 .github/scripts/lh_thresholds.py
+          else
+            echo "Threshold script not found, skipping"
+          fi
 
-                  - name: Setup Node.js
-                    uses: actions/setup-node@v4
-                    with:
-                      node-version: '18'
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report-${{ github.event.pull_request.number }}
+          path: lighthouse
 
-                  - name: Install Lighthouse and http-server
-                    run: |
-                      npm --no-audit --no-fund i -g lighthouse http-server || true
-
-                  - name: Serve docs
-                    run: |
-                      npx http-server docs -p 8080 -c-1 &
-                      for i in {1..10}; do
-                        if curl -sSf http://127.0.0.1:8080/ > /dev/null; then
-                          echo "server started" && break
-                        fi
-                        sleep 1
-                      done
-
-                  - name: Run Lighthouse (JSON + HTML)
-                    run: |
-                      mkdir -p lighthouse || true
-                      npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
-                      ls -lah lighthouse || true
+      - name: Comment PR with summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs')
+            const pr = context.payload.pull_request
+            const jsonPath = 'lighthouse/report.report.json'
+            let body = 'Lighthouse report not found.'
+            if (fs.existsSync(jsonPath)) {
+              const report = JSON.parse(fs.readFileSync(jsonPath))
+              const categories = report.categories || {}
+              const lines = []
+              lines.push('## Lighthouse summary for this PR')
+              lines.push('')
+              for (const key of ['performance','accessibility','best-practices','seo']) {
+                if (categories[key]) {
+                  lines.push(`- **${key}**: ${Math.round(categories[key].score*100)}/100`)
+                }
+              }
+              lines.push('')
+              lines.push('Full HTML and JSON reports are attached as artifacts.')
+              body = lines.join('\n')
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body
+            })
 name: Lighthouse (PR)
 
 on:
@@ -89,9 +112,15 @@ jobs:
         with:
           node-version: '18'
 
+<<<<<<< HEAD
       - name: Install Python deps (PyYAML)
         run: |
           python3 -m pip install --user pyyaml || true
+=======
+      - name: Install dependencies (lighthouse + http-server)
+        run: |
+          npm --no-audit --no-fund i -g lighthouse http-server || true
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
 
       - name: Serve docs
         run: |
@@ -235,6 +264,7 @@ jobs:
             const pr = context.payload.pull_request
             const jsonPath = 'lighthouse/report.report.json'
             let body = 'Lighthouse report not found.'
+<<<<<<< HEAD
             if (fs.existsSync(jsonPath)) {
               const report = JSON.parse(fs.readFileSync(jsonPath))
               const categories = report.categories || {}
@@ -531,6 +561,8 @@ jobs:
             const pr = context.payload.pull_request
             const jsonPath = 'lighthouse/report.report.json'
             let body = 'Lighthouse report not found.'
+=======
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
             name: Lighthouse (PR)
 
             on:
@@ -801,7 +833,10 @@ jobs:
                                                                   - name: Placeholder
                                                                     run: echo "Lighthouse workflow placeholder"
                                                               lines.push('Full HTML and JSON reports are attached as artifacts.')
+<<<<<<< HEAD
 =======
 >>>>>>> 0c5d0cd (ci: add Lighthouse PR job to run Lighthouse and upload reports)
 =======
 >>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
+=======
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)

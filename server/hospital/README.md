@@ -26,6 +26,7 @@ cd server/hospital
 npm install
 npm test
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 ```
 >>>>>>> 797e098 (chore(docs/ci): fix markdown lint issues and clean CI workflows)
@@ -60,6 +61,8 @@ Run tests (requires dev dependencies):
 ```bash
 cd server/hospital
 npm install
+=======
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
 # Hospital API (demo)
 
 Run the hospital API (dev):
