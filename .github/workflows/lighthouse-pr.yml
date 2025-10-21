@@ -20,6 +20,9 @@ jobs:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/master
       - name: Install system deps (Chromium + Python)
         run: |
           sudo apt-get update
@@ -31,15 +34,16 @@ jobs:
 =======
 =======
       - name: Install lighthouse + http-server
+<<<<<<< HEAD
 =======
       - name: Install dependencies (lighthouse + http-server)
 >>>>>>> 3cf7411 (ci(lighthouse): install PyYAML in workflow; tighten LH thresholds)
+=======
+>>>>>>> origin/master
         run: |
-          sudo apt-get update && sudo apt-get install -y wget gnupg python3 python3-pip --no-install-recommends || true
-          # Install a recent Chromium for lighthouse to use
-          sudo apt-get install -y chromium-browser || true
           npm --no-audit --no-fund i -g lighthouse http-server || true
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
 =======
@@ -48,6 +52,9 @@ jobs:
           python3 -m pip install --user pyyaml || true
 
 >>>>>>> 3cf7411 (ci(lighthouse): install PyYAML in workflow; tighten LH thresholds)
+=======
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
+>>>>>>> origin/master
       - name: Serve docs
 >>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
         run: |
@@ -59,11 +66,9 @@ jobs:
             sleep 1
           done
 
-      - name: Run Lighthouse (JSON + HTML)
-        env:
-          CHROME_PATH: /usr/bin/chromium-browser
+      - name: Run Lighthouse
         run: |
-          mkdir -p lighthouse || true
+          mkdir -p lighthouse
           npx -y lighthouse http://127.0.0.1:8080/ --output=json --output=html --output-path=lighthouse/report --chrome-flags="--no-sandbox --headless" || true
 
       - name: Evaluate thresholds
