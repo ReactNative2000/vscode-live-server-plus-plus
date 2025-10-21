@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Judge Requests</title>
+  <style>body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:20px}table{border-collapse:collapse;width:100%}th,td{padding:8px;border:1px solid #ddd}th{background:#f7f7f7;text-align:left}button{padding:6px 10px;margin:2px}</style>
+</head>
+<body>
+  <h1>Judge Requests</h1>
+  <p>Requires admin auth: Authorization: Bearer &lt;ADMIN_TOKEN&gt;</p>
+  <table id="tbl"><thead><tr><th>ID</th><th>Member</th><th>Email</th><th>Message</th><th>Created</th><th>Actions</th></tr></thead><tbody></tbody></table>
+  <script>
+    async function load(){
+      const res = await fetch('/admin/judge-requests');
+      if(res.status === 401){ document.body.innerHTML = '<h2>Unauthorized</h2><p>Provide admin credentials to view this page.</p>'; return; }
+      const j = await res.json();
+      const tbody = document.querySelector('#tbl tbody');
+      (j.requests || []).forEach(r => {
+        const tr = document.createElement('tr');
+        const d = new Date(r.created || 0).toLocaleString();
+        tr.innerHTML = `<td>${r.id}</td><td>${r.member_id||''}</td><td>${r.email||''}</td><td>${(r.message||'').replace(/</g,'&lt;')}</td><td>${d}</td><td><button data-id="${r.id}" class="approve">Approve</button><button data-id="${r.id}" class="reject">Reject</button></td>`;
+        tbody.appendChild(tr);
+      });
+      document.querySelectorAll('button.approve').forEach(b=>b.addEventListener('click', async e=>{
+        const id = e.target.getAttribute('data-id');
+        await fetch('/admin/approve-judge-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({request_id:parseInt(id,10)})});
+        location.reload();
+      }));
+      document.querySelectorAll('button.reject').forEach(b=>b.addEventListener('click', async e=>{
+        const id = e.target.getAttribute('data-id');
+        await fetch('/admin/revoke-judge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({member_id:null,email:null,reason:'rejected request',admin:'web-ui'})});
+        // mark request as handled
+        await fetch('/admin/judge-requests',{method:'GET'});
+        location.reload();
+      }));
+    }
+    load().catch(e=>{ document.body.innerHTML = '<pre>' + (e && e.message) + '</pre>'; });
+  </script>
+</body>
+</html>

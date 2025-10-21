@@ -390,7 +390,25 @@ app.post('/judge/request', (req, res) => {
     const now = Date.now();
     db.run('INSERT INTO judge_requests (member_id,email,message,created) VALUES (?,?,?,?)', [member_id||null,email||null,message||'',now], function(err){
       if(err) return res.status(500).json({ error: err.message });
-      return res.json({ ok: true, id: this.lastID });
+      const id = this.lastID;
+      // Notify admin via SMS if configured, else append to tracks.json
+      try{
+        const notifyTo = process.env.ADMIN_NOTIFY || process.env.TWILIO_TO || null;
+        const text = `New judge request #${id} from ${email||('member:'+member_id)}: ${String(message||'')}`;
+        if(client && notifyTo){
+          client.messages.create({ body: text, from: TWILIO_FROM, to: notifyTo }).then(m=>console.log('Judge request SMS sent', m.sid)).catch(e=>console.error('SMS notify failed', e && e.message));
+        }else{
+          // append to tracks.json
+          try{
+            const trackFile = path.resolve(__dirname, 'tracks.json');
+            let tracks = [];
+            try{ tracks = JSON.parse(fs.readFileSync(trackFile,'utf8')||'[]'); }catch(e){ tracks = []; }
+            tracks.push({ type: 'judge_request', id, member_id: member_id||null, email: email||null, message: message||'', ts: now });
+            fs.writeFileSync(trackFile, JSON.stringify(tracks, null, 2));
+          }catch(e){ console.error('Failed to write track for judge request', e && e.message); }
+        }
+      }catch(e){ console.error('Notify error', e && e.message); }
+      return res.json({ ok: true, id });
     });
   }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
 });
@@ -410,16 +428,39 @@ app.post('/admin/approve-judge-request', requireAdmin, (req, res) => {
     if(!request_id) return res.status(400).json({ error: 'request_id required' });
     db.get('SELECT * FROM judge_requests WHERE id = ? LIMIT 1', [request_id], (err,row)=>{
       if(err || !row) return res.status(404).json({ error: 'request not found' });
-      // promote
-      if(row.member_id){
-        db.run('UPDATE members SET is_judge = 1 WHERE id = ?', [row.member_id], function(e){ if(e) console.error(e); });
-      }else if(row.email){
-        db.run('UPDATE members SET is_judge = 1 WHERE email = ?', [row.email], function(e){ if(e) console.error(e); });
-      }
       const now = Date.now();
-      db.run('UPDATE judge_requests SET status = ? WHERE id = ?', ['approved', request_id]);
-      db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['approved', row.member_id||null, row.email||null, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', row.message||'', now]);
-      res.json({ ok: true });
+      const doPromote = (memberId, emailVal) => {
+        db.run('UPDATE members SET is_judge = 1 WHERE id = ?', [memberId], function(e){ if(e) console.error(e); });
+        db.run('UPDATE judge_requests SET status = ? WHERE id = ?', ['approved', request_id]);
+        db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['approved', memberId||null, emailVal||null, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', row.message||'', now]);
+        res.json({ ok: true });
+      };
+
+      if(row.member_id){
+        // existing member, promote
+        doPromote(row.member_id, row.email);
+      }else if(row.email){
+        // try to find member by email
+        db.get('SELECT id FROM members WHERE email = ? LIMIT 1', [row.email], (e,mrow)=>{
+          if(e) return res.status(500).json({ error: e.message });
+          if(mrow && mrow.id){
+            doPromote(mrow.id, row.email);
+          }else{
+            // create member row and promote
+            const display = row.email.split('@')[0];
+            const joined = Date.now();
+            db.run('INSERT INTO members (application_id,name,email,display_name,type,joined,is_judge) VALUES (?,?,?,?,?,?,?)', [null, display, row.email, display, 'judge', joined, 1], function(insErr){
+              if(insErr) return res.status(500).json({ error: insErr.message });
+              const newId = this.lastID;
+              db.run('UPDATE judge_requests SET status = ? WHERE id = ?', ['approved', request_id]);
+              db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['approved', newId, row.email, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', row.message||'', now]);
+              res.json({ ok: true, created_member_id: newId });
+            });
+          }
+        });
+      }else{
+        return res.status(400).json({ error: 'request lacks member_id and email' });
+      }
     });
   }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
 });
