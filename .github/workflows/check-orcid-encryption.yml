@@ -1,0 +1,35 @@
+name: Check ORCID Encryption
+
+on:
+  push:
+    branches: [ legal/license-and-tests, master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  orcid-encryption:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies for server
+        working-directory: ./server
+        run: npm ci
+
+      - name: Generate temporary ORCID key
+        id: key
+        run: |
+          KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
+          echo "ORCID_KEY=$KEY" >> $GITHUB_OUTPUT
+
+      - name: Run ORCID encryption check
+        env:
+          ORCID_TOKEN_KEY: ${{ steps.key.outputs.ORCID_KEY }}
+        run: |
+          node test/check_orcid_encryption.js
