@@ -1,0 +1,26 @@
+name: Twilio Notify (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      send_live:
+        description: 'Send live SMS?'
+        required: false
+        default: 'false'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dry-run payload
+        run: ./scripts/twilio_test.sh --dry-run
+      - name: Send live (manual)
+        if: ${{ github.event.inputs.send_live == 'true' }}
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+          TWILIO_TO: ${{ secrets.TWILIO_TO }}
+        run: |
+          ./scripts/twilio_test.sh --live "Workflow manual send"

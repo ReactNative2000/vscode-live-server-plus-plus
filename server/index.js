@@ -39,6 +39,18 @@ db.serialize(() => {
     member_id INTEGER,
     created INTEGER
   )`);
+  // ensure refunded column exists (add if missing)
+  db.get("PRAGMA table_info('payments')", [], (err, row) => {
+    // we'll inspect columns later via PRAGMA; add refunded column if not present
+    db.all("PRAGMA table_info('payments')", [], (e, cols) => {
+      if(!e && Array.isArray(cols)){
+        const hasRefunded = cols.find(c => c.name === 'refunded');
+        if(!hasRefunded){
+          try{ db.run('ALTER TABLE payments ADD COLUMN refunded INTEGER DEFAULT 0'); }catch(ex){ /* ignore */ }
+        }
+      }
+    });
+  });
   db.run(`CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type TEXT,
@@ -49,6 +61,14 @@ db.serialize(() => {
     ts INTEGER,
     ua TEXT,
     raw TEXT,
+    created INTEGER
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS scheduled_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    who TEXT,
+    amount INTEGER,
+    run_at INTEGER,
+    processed INTEGER DEFAULT 0,
     created INTEGER
   )`);
 });
@@ -477,6 +497,73 @@ app.get('/admin/export/payments.csv', requireAdmin, (req,res)=>{
   });
 });
 
+// Admin: schedule a gift (simple scheduler)
+app.post('/admin/schedule-gift', requireAdmin, (req, res) => {
+  try{
+    const { who, amount, run_at } = req.body || {};
+    if(!who || !amount || !run_at) return res.status(400).json({ error: 'who, amount, run_at required' });
+    const now = Date.now();
+    db.run('INSERT INTO scheduled_payments (who,amount,run_at,created) VALUES (?,?,?,?)', [who, parseInt(amount,10), parseInt(run_at,10), now], function(err){
+      if(err) return res.status(500).json({ error: err.message });
+      return res.json({ ok: true, id: this.lastID });
+    });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: ledger CSV (payments, include refunded flag)
+app.get('/admin/ledger.csv', requireAdmin, (req,res)=>{
+  db.all('SELECT * FROM payments ORDER BY created DESC', [], (err, rows)=>{
+    if(err) return res.status(500).send('Error');
+    res.setHeader('Content-Type','text/csv');
+    res.setHeader('Content-Disposition','attachment; filename="ledger.csv"');
+    res.write('id,stripe_id,amount,currency,member_id,created,refunded\n');
+    rows.forEach(r=>{
+      res.write(`${r.id},${r.stripe_id||''},${r.amount||''},${r.currency||''},${r.member_id||''},${r.created||''},${r.refunded||0}\n`);
+    });
+    res.end();
+  });
+});
+
+// Admin: refund (mark payment as refunded)
+app.post('/admin/refund/:id', requireAdmin, (req, res) => {
+  const id = req.params.id;
+  db.run('UPDATE payments SET refunded = 1 WHERE id = ?', [id], function(err){
+    if(err) return res.status(500).json({ error: err.message });
+    return res.json({ ok: true, changes: this.changes });
+  });
+});
+
+// Admin: create a playful payment from a named persona (god/satan/man)
+app.post('/admin/pay-from/:who', requireAdmin, (req, res) => {
+  try{
+    const who = req.params.who;
+    const amount = parseInt(req.body && req.body.amount ? req.body.amount : (req.query.amount || '500'), 10);
+    const stripeId = `${who}-${Date.now()}`;
+    const created = Date.now();
+    db.run('INSERT INTO payments (stripe_id,amount,currency,member_id,created) VALUES (?,?,?,?,?)', [stripeId, amount || 0, 'USD', null, created], function(err){
+      if(err) return res.status(500).json({ error: err.message });
+      return res.json({ ok: true, id: this.lastID, stripe_id: stripeId });
+    });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Scheduler loop: process scheduled_payments where run_at <= now and processed = 0
+setInterval(()=>{
+  const now = Date.now();
+  db.all('SELECT * FROM scheduled_payments WHERE processed = 0 AND run_at <= ? LIMIT 10', [now], (err, rows)=>{
+    if(err || !rows || rows.length === 0) return;
+    rows.forEach(r => {
+      // create a payments row as a simulated payment
+      const stripeId = `${r.who}-${Date.now()}`;
+      db.run('INSERT INTO payments (stripe_id,amount,currency,member_id,created) VALUES (?,?,?,?,?)', [stripeId, r.amount || 0, 'USD', null, Date.now()], function(err2){
+        if(err2) console.error('Failed to insert scheduled payment', err2 && err2.message);
+        else console.log('Scheduled payment processed', stripeId);
+      });
+      db.run('UPDATE scheduled_payments SET processed = 1 WHERE id = ?', [r.id], function(e){ if(e) console.error('Failed to mark scheduled', e && e.message); });
+    });
+  });
+}, 2000);
+
 // Admin: record a manual Cash App payment and notify
 app.post('/admin/record-cashapp', requireAdmin, (req,res)=>{
   try{
@@ -658,3 +745,58 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
 
 const port = process.env.PORT || 3000;
 app.listen(port, ()=> console.log('Server listening on', port));
+
+// Character endpoints (serve short Markdown/text artifacts from docs/bible)
+app.get('/character/god', (req, res) => {
+  try{
+    const p = path.resolve(__dirname, '..', 'docs', 'bible', 'God.md');
+    if(!fs.existsSync(p)) return res.status(404).json({ error: 'not found' });
+    const txt = fs.readFileSync(p, 'utf8');
+    return res.json({ ok: true, name: 'God', content: txt });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+app.get('/character/satan', (req, res) => {
+  try{
+    const p = path.resolve(__dirname, '..', 'docs', 'bible', 'Satan.md');
+    if(!fs.existsSync(p)) return res.status(404).json({ error: 'not found' });
+    const txt = fs.readFileSync(p, 'utf8');
+    return res.json({ ok: true, name: 'Satan', content: txt });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+app.get('/character/man', (req, res) => {
+  try{
+    const p = path.resolve(__dirname, '..', 'docs', 'bible', 'Man.md');
+    if(!fs.existsSync(p)) return res.status(404).json({ error: 'not found' });
+    const txt = fs.readFileSync(p, 'utf8');
+    return res.json({ ok: true, name: 'The Man', content: txt });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// New vampire character endpoint
+app.get('/character/vampire', (req, res) => {
+  try{
+    const p = path.resolve(__dirname, '..', 'docs', 'bible', 'Vampire.md');
+    if(!fs.existsSync(p)) return res.status(404).json({ error: 'not found' });
+    const txt = fs.readFileSync(p, 'utf8');
+    return res.json({ ok: true, name: 'Vampire', content: txt });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Minimal ORCID OAuth helpers for demo/testing
+app.get('/orcid/connect', (req, res) => {
+  try{
+    const clientId = process.env.ORCID_CLIENT_ID || 'test-client';
+    const redirectUri = process.env.ORCID_REDIRECT_URI || (`http://127.0.0.1:${process.env.PORT || 3010}/orcid/callback`);
+    const state = Math.random().toString(36).slice(2,10);
+    const url = `https://orcid.org/oauth/authorize?client_id=${encodeURIComponent(clientId)}&response_type=code&scope=/authenticate&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`;
+    return res.redirect(302, url);
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+app.get('/orcid/callback', (req, res) => {
+  // For demo purposes just acknowledge the callback; a full implementation would exchange code for token
+  const { code, state } = req.query || {};
+  return res.json({ ok: true, code: code || null, state: state || null });
+});

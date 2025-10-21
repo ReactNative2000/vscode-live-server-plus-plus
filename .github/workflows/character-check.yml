@@ -1,0 +1,37 @@
+name: Character endpoints check
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  character-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Start server on 3010
+        run: |
+          PORT=3010 npm start &
+          for i in {1..20}; do
+            if curl -sSf http://127.0.0.1:3010/health >/dev/null 2>&1; then
+              echo 'server is up'
+              break
+            fi
+            echo 'waiting for server...'
+            sleep 1
+          done
+
+      - name: Run character check
+        run: node test/playwright/check_characters.js

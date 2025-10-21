@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ORCID Links</title>
+  <style>body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:20px}table{border-collapse:collapse;width:100%}th,td{padding:8px;border:1px solid #ddd}th{background:#f7f7f7;text-align:left}</style>
+</head>
+<body>
+  <h1>Linked ORCID Identities</h1>
+  <p>This page is protected by admin auth; provide Authorization: Bearer &lt;ADMIN_TOKEN&gt; or use basic auth.</p>
+  <table id="tbl"><thead><tr><th>ID</th><th>ORCID</th><th>Created</th><th>Link</th></tr></thead><tbody></tbody></table>
+  <script>
+    async function load(){
+      const res = await fetch('/admin/orcid-links', { credentials: 'same-origin' });
+      if(res.status === 401){ document.body.innerHTML = '<h2>Unauthorized</h2><p>Provide admin credentials to view this page.</p>'; return; }
+      const j = await res.json();
+      const tbody = document.querySelector('#tbl tbody');
+      (j.orcid_links || []).forEach(r => {
+        const tr = document.createElement('tr');
+        const d = new Date(r.created || 0).toLocaleString();
+        tr.innerHTML = `<td>${r.id}</td><td>${r.orcid}</td><td>${d}</td><td><a href="https://orcid.org/${r.orcid}" target="_blank">view</a></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    load().catch(e=>{ document.body.innerHTML = '<pre>' + (e && e.message) + '</pre>'; });
+  </script>
+</body>
+</html>
