@@ -26,17 +26,18 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    const earthGeo = {
-      "type": "FeatureCollection",
-      "features": [
-        { "type": "Feature", "properties": { "name": "Earth" }, "geometry": { "type": "Polygon", "coordinates": [[[-180,-90],[180,-90],[180,90],[-180,90],[-180,-90]]] } }
-      ]
-    };
+    // fetch the geojson relative to this docs directory
+    fetch('./data/earth.geojson').then(r => r.json()).then(earthGeo => {
+      const geoLayer = L.geoJSON(earthGeo, {
+        style: { color: '#0077cc', weight: 2, fill: true, fillOpacity: 0.05 }
+      }).addTo(map);
+      map.fitBounds(geoLayer.getBounds());
+    }).catch(err => {
+      console.warn('Failed to load geojson', err);
+    });
 
-    const geoLayer = L.geoJSON(earthGeo, {
-      style: { color: '#0077cc', weight: 2, fill: true, fillOpacity: 0.05 }
-    }).addTo(map);
-    map.fitBounds(geoLayer.getBounds());
+    // expose map for tests
+    window.map = map;
   </script>
 </body>
 </html>
