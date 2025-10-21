@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Earth (bbox)</name>
+    <description>World bounding polygon (approximate)</description>
+    <Placemark>
+      <name>Earth</name>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              -180.0,-90.0 180.0,-90.0 180.0,90.0 -180.0,90.0 -180.0,-90.0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+  </Document>
+</kml>
