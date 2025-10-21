@@ -35,12 +35,13 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "start": "node server/index.js",
     "copy-assets": "cpy \"./src/core/assets/**/*\" ./out/core/assets --parents",
     "copy-assets:watch": "cpy \"./src/core/assets/**/*\" ./out/core/assets --parents --watch",
     "compile": "tsc -p ./ && npm run copy-assets",
     "watch": "npm run copy-assets  && tsc -watch -p ./",
-  "postinstall": "[ -n \"$SKIP_VSCODE_INSTALL\" ] && echo \"Skipping vscode install (SKIP_VSCODE_INSTALL)\" || echo \"Skipping vscode install (package removed)\"",
-  "test": "npm run compile",
+    "postinstall": "[ -n \"$SKIP_VSCODE_INSTALL\" ] && echo \"Skipping vscode install (SKIP_VSCODE_INSTALL)\" || echo \"Skipping vscode install (package removed)\"",
+    "test": "npm run compile",
     "dev:all": "concurrently \"node server/hospital/index.js\" \"npx http-server docs -p 8080\""
   },
   "main": "./out/extension/index.js",
@@ -114,19 +115,20 @@
     "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
     "@types/open": "^6.1.0",
+    "@types/vscode": "^1.77.0",
     "@types/ws": "^6.0.1",
+    "@vscode/test-electron": "^2.5.1",
     "concurrently": "^8.0.1",
-  "cpy-cli": "^6.0.0",
+    "cpy-cli": "^6.0.0",
     "tslint": "^5.12.1",
-    "typescript": "^3.3.1",
-  "@types/vscode": "^1.77.0",
-  "@vscode/test-electron": "^2.5.1"
+    "typescript": "^3.3.1"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "mime-types": "^2.1.22",
     "open": "^6.1.0",
     "puppeteer": "^24.25.0",
+    "sqlite3": "^5.1.7",
     "ws": "^6.2.1"
   }
 }
