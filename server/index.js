@@ -58,6 +58,15 @@ db.serialize(() => {
     type TEXT,
     joined INTEGER
   )`);
+  // ensure is_judge column exists on members (add if missing)
+  db.all("PRAGMA table_info('members')", [], (e, cols) => {
+    if(!e && Array.isArray(cols)){
+      const hasJudge = cols.find(c => c.name === 'is_judge');
+      if(!hasJudge){
+        try{ db.run('ALTER TABLE members ADD COLUMN is_judge INTEGER DEFAULT 0'); }catch(ex){ /* ignore */ }
+      }
+    }
+  });
   db.run(`CREATE TABLE IF NOT EXISTS payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     stripe_id TEXT,
@@ -325,6 +334,33 @@ app.get('/admin/members', requireAdmin, (req,res)=>{
   db.all('SELECT * FROM members ORDER BY joined DESC LIMIT 1000', [], (err,rows)=>{
     if(err) return res.status(500).json({ error: err.message });
     res.json({ members: rows });
+  });
+});
+
+// Admin: promote a member to judge (body: { member_id } or { email })
+app.post('/admin/make-judge', requireAdmin, (req, res) => {
+  try{
+    const { member_id, email } = req.body || {};
+    if(!member_id && !email) return res.status(400).json({ error: 'member_id or email required' });
+    if(member_id){
+      db.run('UPDATE members SET is_judge = 1 WHERE id = ?', [member_id], function(err){
+        if(err) return res.status(500).json({ error: err.message });
+        return res.json({ ok: true, changes: this.changes });
+      });
+    }else{
+      db.run('UPDATE members SET is_judge = 1 WHERE email = ?', [email], function(err){
+        if(err) return res.status(500).json({ error: err.message });
+        return res.json({ ok: true, changes: this.changes });
+      });
+    }
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: list judges
+app.get('/admin/judges', requireAdmin, (req, res) => {
+  db.all('SELECT * FROM members WHERE is_judge = 1 ORDER BY joined DESC', [], (err, rows) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ judges: rows });
   });
 });
 
