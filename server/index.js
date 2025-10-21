@@ -107,6 +107,24 @@ db.serialize(() => {
     processed INTEGER DEFAULT 0,
     created INTEGER
   )`);
+  // judge request and audit tables
+  db.run(`CREATE TABLE IF NOT EXISTS judge_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    member_id INTEGER,
+    email TEXT,
+    message TEXT,
+    status TEXT DEFAULT 'pending',
+    created INTEGER
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS judge_audit (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action TEXT,
+    member_id INTEGER,
+    email TEXT,
+    admin TEXT,
+    reason TEXT,
+    created INTEGER
+  )`);
 });
 
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
@@ -362,6 +380,64 @@ app.get('/admin/judges', requireAdmin, (req, res) => {
     if(err) return res.status(500).json({ error: err.message });
     res.json({ judges: rows });
   });
+});
+
+// Public: request judge status (member_id or email + optional message)
+app.post('/judge/request', (req, res) => {
+  try{
+    const { member_id, email, message } = req.body || {};
+    if(!member_id && !email) return res.status(400).json({ error: 'member_id or email required' });
+    const now = Date.now();
+    db.run('INSERT INTO judge_requests (member_id,email,message,created) VALUES (?,?,?,?)', [member_id||null,email||null,message||'',now], function(err){
+      if(err) return res.status(500).json({ error: err.message });
+      return res.json({ ok: true, id: this.lastID });
+    });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: list judge requests
+app.get('/admin/judge-requests', requireAdmin, (req, res) => {
+  db.all('SELECT * FROM judge_requests ORDER BY created DESC', [], (err, rows) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ requests: rows });
+  });
+});
+
+// Admin: approve a judge request by id
+app.post('/admin/approve-judge-request', requireAdmin, (req, res) => {
+  try{
+    const { request_id, admin } = req.body || {};
+    if(!request_id) return res.status(400).json({ error: 'request_id required' });
+    db.get('SELECT * FROM judge_requests WHERE id = ? LIMIT 1', [request_id], (err,row)=>{
+      if(err || !row) return res.status(404).json({ error: 'request not found' });
+      // promote
+      if(row.member_id){
+        db.run('UPDATE members SET is_judge = 1 WHERE id = ?', [row.member_id], function(e){ if(e) console.error(e); });
+      }else if(row.email){
+        db.run('UPDATE members SET is_judge = 1 WHERE email = ?', [row.email], function(e){ if(e) console.error(e); });
+      }
+      const now = Date.now();
+      db.run('UPDATE judge_requests SET status = ? WHERE id = ?', ['approved', request_id]);
+      db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['approved', row.member_id||null, row.email||null, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', row.message||'', now]);
+      res.json({ ok: true });
+    });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: revoke judge status (member_id or email, optional reason)
+app.post('/admin/revoke-judge', requireAdmin, (req, res) => {
+  try{
+    const { member_id, email, reason, admin } = req.body || {};
+    if(!member_id && !email) return res.status(400).json({ error: 'member_id or email required' });
+    if(member_id){
+      db.run('UPDATE members SET is_judge = 0 WHERE id = ?', [member_id], function(err){ if(err) return res.status(500).json({ error: err.message }); });
+    }else{
+      db.run('UPDATE members SET is_judge = 0 WHERE email = ?', [email], function(err){ if(err) return res.status(500).json({ error: err.message }); });
+    }
+    const now = Date.now();
+    db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['revoked', member_id||null, email||null, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', reason||'', now]);
+    res.json({ ok: true });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
 });
 
 // Admin-protected route: list payments
