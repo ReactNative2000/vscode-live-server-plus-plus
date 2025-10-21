@@ -1,0 +1,22 @@
+### Send reflection (JSON)
+POST https://script.google.com/macros/s/AKfycbwELGti1O-UzG5fhGf0IYJY-wZ1wzYmxGO4aGgi9WpzwO0Wr_SjGIc-68MHY72kUmJ7rA/exec
+Content-Type: application/json
+
+{
+  "fio": "Test Student",
+  "topic": "Algorithms",
+  "game": "Tic-Tac-Toe",
+  "q1": "The explanation of recursion was clear",
+  "q2": "I got stuck at base cases",
+  "q3": "4",
+  "q4": "😊",
+  "q5": ["More examples","Slower pace"],
+  "ts": "2025-10-17T12:00:00Z",
+  "source": "rest-client"
+}
+
+### Send reflection (form-encoded)
+POST https://script.google.com/macros/s/AKfycbwELGti1O-UzG5fhGf0IYJY-wZ1wzYmxGO4aGgi9WpzwO0Wr_SjGIc-68MHY72kUmJ7rA/exec
+Content-Type: application/x-www-form-urlencoded
+
+fio=Test%20Student&topic=Algorithms&game=Tic-Tac-Toe&q1=Clear+explanation&q2=Stuck+at+loops&q3=4&q4=%F0%9F%98%8A&q5=More+examples&q5=Slower+pace

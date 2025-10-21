@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Video Chat Demo (Supabase signaling)</title>
+    <style>
+      body{font-family:system-ui,Arial;margin:12px}
+      #friends{display:flex;flex-direction:column;gap:6px}
+      video{width:320px;height:240px;background:#000}
+      .row{display:flex;gap:8px;align-items:center}
+    </style>
+  </head>
+  <body>
+    <h1>Video Chat Demo</h1>
+  <p class="small">A minimal demo using Supabase Realtime for signaling (offers/answers/ICE). This is a demo only — configure RLS and auth for production.</p>
+  <p class="small">To test locally: from the repository root run <code>python3 -m http.server 8000</code> and open <code>http://localhost:8000/docs/examples/video_chat.html</code>.</p>
+
+    <div class="row">
+      <label>Your name: <input id="me" /></label>
+      <button id="connect">Connect</button>
+    </div>
+
+    <h3>Friends (demo local list)</h3>
+    <div id="friends"></div>
+
+    <h3>Local / Remote</h3>
+    <div class="row">
+      <video id="local" autoplay muted playsinline></video>
+      <video id="remote" autoplay playsinline></video>
+    </div>
+
+    <script type="module">
+      // IMPORTANT: Replace with your Supabase project info for a real run
+      const SUPABASE_URL = 'https://your-project.supabase.co'
+      const SUPABASE_ANON = 'public-anon-key'
+
+      // Minimal friend list (demo-only). In production, fetch from a table.
+      const demoFriends = [ {id:'alice', name:'Alice'}, {id:'bob', name:'Bob'} ]
+
+      let me = ''
+      const pcConfig = { iceServers: [{urls:['stun:stun.l.google.com:19302']}] }
+      let pc = null
+      let localStream = null
+      let channel = null
+
+      const localVideo = document.getElementById('local')
+      const remoteVideo = document.getElementById('remote')
+      const friendsEl = document.getElementById('friends')
+
+      function renderFriends(){
+        friendsEl.innerHTML = ''
+        demoFriends.forEach(f=>{
+          const btn = document.createElement('button')
+          btn.textContent = `Call ${f.name}`
+          btn.onclick = ()=> startCall(f.id)
+          const div = document.createElement('div')
+          div.className='row'
+          div.appendChild(btn)
+          friendsEl.appendChild(div)
+        })
+      }
+
+      async function ensureMedia(){
+        if (localStream) return localStream
+        localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true})
+        localVideo.srcObject = localStream
+        return localStream
+      }
+
+      function createPC(peerId){
+        pc = new RTCPeerConnection(pcConfig)
+        pc.ontrack = e => { remoteVideo.srcObject = e.streams[0] }
+        pc.onicecandidate = e => { if (e.candidate) sendSignal(peerId, {type:'ice', candidate:e.candidate}) }
+        return pc
+      }
+
+      async function startCall(peerId){
+        await ensureMedia()
+        createPC(peerId)
+        localStream.getTracks().forEach(t=>pc.addTrack(t, localStream))
+        const offer = await pc.createOffer()
+        await pc.setLocalDescription(offer)
+        sendSignal(peerId, { type:'offer', sdp: offer.sdp })
+      }
+
+      async function handleSignal(msg){
+        if (!msg) return
+        const {from,type,payload} = msg
+        if (type === 'offer'){
+          await ensureMedia()
+          createPC(from)
+          localStream.getTracks().forEach(t=>pc.addTrack(t, localStream))
+          await pc.setRemoteDescription({ type:'offer', sdp: payload.sdp })
+          const answer = await pc.createAnswer()
+          await pc.setLocalDescription(answer)
+          sendSignal(from, { type:'answer', sdp: answer.sdp })
+        } else if (type === 'answer'){
+          await pc.setRemoteDescription({ type:'answer', sdp: payload.sdp })
+        } else if (type === 'ice'){
+          try{ await pc.addIceCandidate(payload.candidate) }catch(err){ console.warn('ICE add failed', err) }
+        }
+      }
+
+      // Minimal signaling using Supabase Realtime channel
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+      let supabase = null
+
+      async function connect(){
+        me = document.getElementById('me').value || ('anon-'+Math.random().toString(36).slice(2,8))
+        supabase = createClient(SUPABASE_URL, SUPABASE_ANON)
+        // Create a lightweight 'webrtc' channel; we're using broadcast here for demo only.
+        channel = supabase.channel('webrtc')
+        channel.on('broadcast', { event: 'signal' }, (payload)=>{
+          if (!payload || payload.payload.to !== me) return
+          handleSignal(payload.payload)
+        })
+        await channel.subscribe()
+        renderFriends()
+        alert('Connected to signaling channel (demo). Set your name and call a friend.')
+      }
+
+      function sendSignal(to, payload){
+        const msg = { from: me, to, type: payload.type, payload }
+        // Broadcast a signal event with a small envelope; in production use targeted channel or DB rows with RLS
+        channel.broadcast('signal', { payload: msg })
+      }
+
+      document.getElementById('connect').addEventListener('click', ()=> connect())
+
+      // Small inbound handler: when a broadcast event arrives the on() callback calls handleSignal
+    </script>
+  </body>
+</html>
