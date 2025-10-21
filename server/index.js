@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const crypto = require('crypto');
 
 const app = express();
 app.use(bodyParser.json());
@@ -10,6 +11,32 @@ app.use(bodyParser.json());
 // Initialize SQLite DB for members
 const DB_PATH = path.resolve(__dirname, 'lspp.db');
 const db = new sqlite3.Database(DB_PATH);
+
+// Crypto helpers for optional token encryption (AES-256-GCM)
+const ORCID_TOKEN_KEY = process.env.ORCID_TOKEN_KEY || null; // expected base64 or raw
+function getKey(){
+  if(!ORCID_TOKEN_KEY) return null;
+  try{ return Buffer.from(ORCID_TOKEN_KEY, 'base64'); }catch(e){ return Buffer.from(String(ORCID_TOKEN_KEY)); }
+}
+function encryptToken(plain){
+  const key = getKey(); if(!key) return null;
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(String(plain), 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, encrypted]).toString('base64');
+}
+function decryptToken(blob){
+  const key = getKey(); if(!key || !blob) return null;
+  const data = Buffer.from(blob, 'base64');
+  const iv = data.slice(0,12);
+  const tag = data.slice(12,28);
+  const encrypted = data.slice(28);
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(tag);
+  const dec = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+  return dec.toString('utf8');
+}
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,6 +58,15 @@ db.serialize(() => {
     type TEXT,
     joined INTEGER
   )`);
+  // ensure is_judge column exists on members (add if missing)
+  db.all("PRAGMA table_info('members')", [], (e, cols) => {
+    if(!e && Array.isArray(cols)){
+      const hasJudge = cols.find(c => c.name === 'is_judge');
+      if(!hasJudge){
+        try{ db.run('ALTER TABLE members ADD COLUMN is_judge INTEGER DEFAULT 0'); }catch(ex){ /* ignore */ }
+      }
+    }
+  });
   db.run(`CREATE TABLE IF NOT EXISTS payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     stripe_id TEXT,
@@ -69,6 +105,24 @@ db.serialize(() => {
     amount INTEGER,
     run_at INTEGER,
     processed INTEGER DEFAULT 0,
+    created INTEGER
+  )`);
+  // judge request and audit tables
+  db.run(`CREATE TABLE IF NOT EXISTS judge_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    member_id INTEGER,
+    email TEXT,
+    message TEXT,
+    status TEXT DEFAULT 'pending',
+    created INTEGER
+  )`);
+  db.run(`CREATE TABLE IF NOT EXISTS judge_audit (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action TEXT,
+    member_id INTEGER,
+    email TEXT,
+    admin TEXT,
+    reason TEXT,
     created INTEGER
   )`);
 });
@@ -299,6 +353,132 @@ app.get('/admin/members', requireAdmin, (req,res)=>{
     if(err) return res.status(500).json({ error: err.message });
     res.json({ members: rows });
   });
+});
+
+// Admin: promote a member to judge (body: { member_id } or { email })
+app.post('/admin/make-judge', requireAdmin, (req, res) => {
+  try{
+    const { member_id, email } = req.body || {};
+    if(!member_id && !email) return res.status(400).json({ error: 'member_id or email required' });
+    if(member_id){
+      db.run('UPDATE members SET is_judge = 1 WHERE id = ?', [member_id], function(err){
+        if(err) return res.status(500).json({ error: err.message });
+        return res.json({ ok: true, changes: this.changes });
+      });
+    }else{
+      db.run('UPDATE members SET is_judge = 1 WHERE email = ?', [email], function(err){
+        if(err) return res.status(500).json({ error: err.message });
+        return res.json({ ok: true, changes: this.changes });
+      });
+    }
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: list judges
+app.get('/admin/judges', requireAdmin, (req, res) => {
+  db.all('SELECT * FROM members WHERE is_judge = 1 ORDER BY joined DESC', [], (err, rows) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ judges: rows });
+  });
+});
+
+// Public: request judge status (member_id or email + optional message)
+app.post('/judge/request', (req, res) => {
+  try{
+    const { member_id, email, message } = req.body || {};
+    if(!member_id && !email) return res.status(400).json({ error: 'member_id or email required' });
+    const now = Date.now();
+    db.run('INSERT INTO judge_requests (member_id,email,message,created) VALUES (?,?,?,?)', [member_id||null,email||null,message||'',now], function(err){
+      if(err) return res.status(500).json({ error: err.message });
+      const id = this.lastID;
+      // Notify admin via SMS if configured, else append to tracks.json
+      try{
+        const notifyTo = process.env.ADMIN_NOTIFY || process.env.TWILIO_TO || null;
+        const text = `New judge request #${id} from ${email||('member:'+member_id)}: ${String(message||'')}`;
+        if(client && notifyTo){
+          client.messages.create({ body: text, from: TWILIO_FROM, to: notifyTo }).then(m=>console.log('Judge request SMS sent', m.sid)).catch(e=>console.error('SMS notify failed', e && e.message));
+        }else{
+          // append to tracks.json
+          try{
+            const trackFile = path.resolve(__dirname, 'tracks.json');
+            let tracks = [];
+            try{ tracks = JSON.parse(fs.readFileSync(trackFile,'utf8')||'[]'); }catch(e){ tracks = []; }
+            tracks.push({ type: 'judge_request', id, member_id: member_id||null, email: email||null, message: message||'', ts: now });
+            fs.writeFileSync(trackFile, JSON.stringify(tracks, null, 2));
+          }catch(e){ console.error('Failed to write track for judge request', e && e.message); }
+        }
+      }catch(e){ console.error('Notify error', e && e.message); }
+      return res.json({ ok: true, id });
+    });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: list judge requests
+app.get('/admin/judge-requests', requireAdmin, (req, res) => {
+  db.all('SELECT * FROM judge_requests ORDER BY created DESC', [], (err, rows) => {
+    if(err) return res.status(500).json({ error: err.message });
+    res.json({ requests: rows });
+  });
+});
+
+// Admin: approve a judge request by id
+app.post('/admin/approve-judge-request', requireAdmin, (req, res) => {
+  try{
+    const { request_id, admin } = req.body || {};
+    if(!request_id) return res.status(400).json({ error: 'request_id required' });
+    db.get('SELECT * FROM judge_requests WHERE id = ? LIMIT 1', [request_id], (err,row)=>{
+      if(err || !row) return res.status(404).json({ error: 'request not found' });
+      const now = Date.now();
+      const doPromote = (memberId, emailVal) => {
+        db.run('UPDATE members SET is_judge = 1 WHERE id = ?', [memberId], function(e){ if(e) console.error(e); });
+        db.run('UPDATE judge_requests SET status = ? WHERE id = ?', ['approved', request_id]);
+        db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['approved', memberId||null, emailVal||null, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', row.message||'', now]);
+        res.json({ ok: true });
+      };
+
+      if(row.member_id){
+        // existing member, promote
+        doPromote(row.member_id, row.email);
+      }else if(row.email){
+        // try to find member by email
+        db.get('SELECT id FROM members WHERE email = ? LIMIT 1', [row.email], (e,mrow)=>{
+          if(e) return res.status(500).json({ error: e.message });
+          if(mrow && mrow.id){
+            doPromote(mrow.id, row.email);
+          }else{
+            // create member row and promote
+            const display = row.email.split('@')[0];
+            const joined = Date.now();
+            db.run('INSERT INTO members (application_id,name,email,display_name,type,joined,is_judge) VALUES (?,?,?,?,?,?,?)', [null, display, row.email, display, 'judge', joined, 1], function(insErr){
+              if(insErr) return res.status(500).json({ error: insErr.message });
+              const newId = this.lastID;
+              db.run('UPDATE judge_requests SET status = ? WHERE id = ?', ['approved', request_id]);
+              db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['approved', newId, row.email, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', row.message||'', now]);
+              res.json({ ok: true, created_member_id: newId });
+            });
+          }
+        });
+      }else{
+        return res.status(400).json({ error: 'request lacks member_id and email' });
+      }
+    });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
+});
+
+// Admin: revoke judge status (member_id or email, optional reason)
+app.post('/admin/revoke-judge', requireAdmin, (req, res) => {
+  try{
+    const { member_id, email, reason, admin } = req.body || {};
+    if(!member_id && !email) return res.status(400).json({ error: 'member_id or email required' });
+    if(member_id){
+      db.run('UPDATE members SET is_judge = 0 WHERE id = ?', [member_id], function(err){ if(err) return res.status(500).json({ error: err.message }); });
+    }else{
+      db.run('UPDATE members SET is_judge = 0 WHERE email = ?', [email], function(err){ if(err) return res.status(500).json({ error: err.message }); });
+    }
+    const now = Date.now();
+    db.run('INSERT INTO judge_audit (action,member_id,email,admin,reason,created) VALUES (?,?,?,?,?,?)', ['revoked', member_id||null, email||null, admin||req.headers['x-admin-user']||req.headers['x-admin']||'admin', reason||'', now]);
+    res.json({ ok: true });
+  }catch(e){ console.error(e); return res.status(500).json({ error: e.message }); }
 });
 
 // Admin-protected route: list payments

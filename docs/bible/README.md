@@ -7,6 +7,9 @@ Files:
 - `Satan.md` — a literary, neutral description of the figure "Satan" for creative or technical examples (content warning).
  - `Man.md` — a personalized character entry for "The Man" (can be adjusted to include your name or tone).
  - `man.html` — a small profile page for the persona (ReactNative2000).
+ - `Vampire.md` — a gothic/mythic character sketch for demos.
+ - `vampire.html` — a small demo page for the Vampire persona.
+ - `Doctor.md` — a neutral professional doctor persona for demos.
 
 You can also have the persona send playful payments:
 
