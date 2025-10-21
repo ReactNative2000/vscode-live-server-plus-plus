@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test'
 
 test('courthouse hospital demo loads items from hospital API', async ({ page }) => {
+<<<<<<< HEAD
+  const BASE = process.env.BASE_URL || 'http://127.0.0.1:8080'
+  await page.goto(`${BASE}/courthouse/hospital.html`)
+=======
   await page.goto('http://127.0.0.1:8080/courthouse/hospital.html')
+>>>>>>> origin/master
   // Click load and wait for items/status to update
   await page.click('button#load')
   const status = page.locator('#status')

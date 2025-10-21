@@ -1,0 +1,73 @@
+name: CI - full checks
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  full-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start server on 3010
+        env:
+          ORCID_CLIENT_ID: test-client
+          ORCID_CLIENT_SECRET: test-secret
+          ORCID_REDIRECT_URI: http://127.0.0.1:3010/orcid/callback
+        run: |
+          PORT=3010 npm start &
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:3010/health >/dev/null 2>&1; then
+              echo 'server is up'
+              break
+            fi
+            echo 'waiting for server...'
+            sleep 1
+          done
+
+      - name: Run quick ORCID redirect check
+        run: node test/playwright/check_orcid_connect.js
+        env:
+          TEST_BASE_URL: http://127.0.0.1:3010
+
+      - name: Run character endpoints check
+        run: node test/playwright/check_characters.js
+        env:
+          TEST_BASE_URL: http://127.0.0.1:3010
+
+      - name: Run man payment check
+        run: node test/playwright/check_man_pay.js
+        env:
+          TEST_BASE_URL: http://127.0.0.1:3010
+          ADMIN_TOKEN: testtoken
+
+      - name: Run Playwright tests
+        run: npx playwright test --config=playwright.config.js --reporter=list
+
+      - name: Run Lighthouse audit
+        run: |
+          npm install -g lighthouse
+          # run lighthouse with headless chrome and save JSON
+          npx lighthouse http://127.0.0.1:3010 --quiet --chrome-flags="--headless --no-sandbox --disable-gpu" --output=json --output-path=./lighthouse-report.json || true
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: ./lighthouse-report.json

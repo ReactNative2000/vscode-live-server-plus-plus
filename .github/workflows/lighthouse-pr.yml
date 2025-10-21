@@ -19,6 +19,10 @@ jobs:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/master
       - name: Install system deps (Chromium + Python)
         run: |
           sudo apt-get update
@@ -30,10 +34,27 @@ jobs:
 =======
 =======
       - name: Install lighthouse + http-server
+<<<<<<< HEAD
+=======
+      - name: Install dependencies (lighthouse + http-server)
+>>>>>>> 3cf7411 (ci(lighthouse): install PyYAML in workflow; tighten LH thresholds)
+=======
+>>>>>>> origin/master
         run: |
           npm --no-audit --no-fund i -g lighthouse http-server || true
 
+<<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
+=======
+      - name: Install Python deps (PyYAML)
+        run: |
+          python3 -m pip install --user pyyaml || true
+
+>>>>>>> 3cf7411 (ci(lighthouse): install PyYAML in workflow; tighten LH thresholds)
+=======
+>>>>>>> ce53a0c (ci(lighthouse): replace corrupted workflow; fix ts compile; add tsconfig and cors dep for hospital server)
+>>>>>>> origin/master
       - name: Serve docs
 >>>>>>> 8a6439c (ci(lighthouse): fix workflow YAML and call external threshold script instead of inline heredoc)
         run: |

@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Admin — Man Profile</title>
+<style>body{font-family:system-ui,Arial;max-width:900px;margin:24px auto;padding:16px}label{display:block;margin-top:12px}input,textarea{width:100%;padding:8px}</style>
+</head>
+<body>
+<h1>Man Profile (Admin)</h1>
+<form id="frm">
+  <label>Name <input id="name" /></label>
+  <label>Bio <textarea id="bio" rows="8"></textarea></label>
+  <label>Profile picture (upload) <input id="file" type="file" /></label>
+  <button type="submit">Save</button>
+</form>
+<script>
+async function load(){
+  const r = await fetch('/character/man');
+  const j = await r.json();
+  document.getElementById('name').value = j.name || '';
+  const content = j.content || '';
+  document.getElementById('bio').value = content.split('\n').slice(0,12).join('\n');
+}
+load();
+
+document.getElementById('frm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('name').value;
+  const bio = document.getElementById('bio').value;
+  const fd = new FormData();
+  fd.append('name', name);
+  fd.append('bio', bio);
+  const file = document.getElementById('file').files[0];
+  if(file) fd.append('file', file);
+  const token = prompt('Admin token:');
+  const resp = await fetch('/admin/man', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: fd });
+  alert('Saved: ' + (resp.ok ? 'OK' : 'ERROR'));
+});
+</script>
+</body>
+</html>

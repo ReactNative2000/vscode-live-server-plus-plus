@@ -1,0 +1,48 @@
+name: Man persona checks
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  man-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Start server on 3010
+        env:
+          ADMIN_TOKEN: testtoken
+          ORCID_CLIENT_ID: test-client
+          ORCID_CLIENT_SECRET: test-secret
+          ORCID_REDIRECT_URI: http://127.0.0.1:3010/orcid/callback
+        run: |
+          PORT=3010 ADMIN_TOKEN=testtoken npm start &
+          for i in {1..20}; do
+            if curl -sSf http://127.0.0.1:3010/health >/dev/null 2>&1; then
+              echo 'server up'; break
+            fi
+            sleep 1
+          done
+
+      - name: Run Man endpoint check
+        run: node test/playwright/check_man.js
+        env:
+          TEST_BASE_URL: http://127.0.0.1:3010
+
+      - name: Run Man pay test
+        run: node test/playwright/check_man_pay.js
+        env:
+          TEST_BASE_URL: http://127.0.0.1:3010
+          ADMIN_TOKEN: testtoken
