@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const crypto = require('crypto');
 
 const app = express();
 app.use(bodyParser.json());
@@ -10,6 +11,32 @@ app.use(bodyParser.json());
 // Initialize SQLite DB for members
 const DB_PATH = path.resolve(__dirname, 'lspp.db');
 const db = new sqlite3.Database(DB_PATH);
+
+// Crypto helpers for optional token encryption (AES-256-GCM)
+const ORCID_TOKEN_KEY = process.env.ORCID_TOKEN_KEY || null; // expected base64 or raw
+function getKey(){
+  if(!ORCID_TOKEN_KEY) return null;
+  try{ return Buffer.from(ORCID_TOKEN_KEY, 'base64'); }catch(e){ return Buffer.from(String(ORCID_TOKEN_KEY)); }
+}
+function encryptToken(plain){
+  const key = getKey(); if(!key) return null;
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(String(plain), 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, encrypted]).toString('base64');
+}
+function decryptToken(blob){
+  const key = getKey(); if(!key || !blob) return null;
+  const data = Buffer.from(blob, 'base64');
+  const iv = data.slice(0,12);
+  const tag = data.slice(12,28);
+  const encrypted = data.slice(28);
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(tag);
+  const dec = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+  return dec.toString('utf8');
+}
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
