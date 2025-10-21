@@ -29,10 +29,86 @@ jobs:
           KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
           ORCID_TOKEN_KEY="$KEY" NODE_PATH=server/node_modules node test/check_orcid_encryption.js
 
+      - name: Start local servers for E2E
+        run: |
+          echo "Starting static docs server on :8080 and demo APIs (3010,4001,5002)"
+          # start static docs server (http-server from dev deps)
+          npx http-server docs -p 8080 -c-1 > /tmp/http-server.log 2>&1 &
+          # start main Node server (ORCID endpoints) on 3010
+          PORT=3010 node server/index.js > /tmp/main-server.log 2>&1 &
+          # start hospital demo
+          PORT=4001 node server/hospital/index.js > /tmp/hospital.log 2>&1 &
+          # start homicide demo
+          PORT=5002 node server/homicide/index.js > /tmp/homicide.log 2>&1 &
+
+          # helper to wait for a URL to become available
+          wait_for() {
+            local url=$1; local retries=${2:-20}; local i
+            for i in $(seq 1 $retries); do
+              if curl -sSf --max-time 2 "$url" >/dev/null 2>&1; then
+                echo "OK: $url"
+                return 0
+              fi
+              echo "Waiting for $url ($i/$retries)..."
+              sleep 1
+            done
+            echo "ERROR: $url did not become available"
+            return 1
+          }
+
+          wait_for http://127.0.0.1:8080 || (cat /tmp/http-server.log && exit 1)
+          wait_for http://127.0.0.1:3010/health || (cat /tmp/main-server.log && exit 1)
+          wait_for http://127.0.0.1:4001/api/items || (cat /tmp/hospital.log && exit 1)
+          wait_for http://127.0.0.1:5002/api/cases || (cat /tmp/homicide.log && exit 1)
+
       - name: Install Playwright browsers
         run: |
           cd test/playwright
           npx playwright install --with-deps
+
+      - name: Start local demo servers and static docs
+        run: |
+          # start main node server (ORCID endpoints) on 3010
+          PORT=3010 npm start > /tmp/lspp-server.log 2>&1 &
+          echo $! > /tmp/lspp-server.pid
+
+          # start hospital demo API on 4001
+          node server/hospital/index.js > /tmp/hospital.log 2>&1 &
+          echo $! > /tmp/hospital.pid
+
+          # start homicide demo API on 5002
+          node server/homicide/index.js > /tmp/homicide.log 2>&1 &
+          echo $! > /tmp/homicide.pid
+
+          # serve static docs on 8080 (use npx http-server, install if needed)
+          npx http-server docs -p 8080 -a 127.0.0.1 -c-1 > /tmp/http-server.log 2>&1 &
+          echo $! > /tmp/http-server.pid
+
+          # wait for services to become available
+          set -e
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:8080/ >/dev/null; then break; fi
+            echo "waiting for docs server... ($i)"; sleep 1
+            if [ $i -eq 30 ]; then cat /tmp/http-server.log; exit 1; fi
+          done
+
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:4001/api/items >/dev/null; then break; fi
+            echo "waiting for hospital API... ($i)"; sleep 1
+            if [ $i -eq 30 ]; then tail -n +1 /tmp/hospital.log; exit 1; fi
+          done
+
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:5002/api/cases >/dev/null; then break; fi
+            echo "waiting for homicide API... ($i)"; sleep 1
+            if [ $i -eq 30 ]; then tail -n +1 /tmp/homicide.log; exit 1; fi
+          done
+
+          for i in {1..30}; do
+            if curl -sSf http://127.0.0.1:3010/health >/dev/null; then break; fi
+            echo "waiting for main server (ORCID)... ($i)"; sleep 1
+            if [ $i -eq 30 ]; then tail -n +1 /tmp/lspp-server.log; exit 1; fi
+          done
 
       - name: Run Playwright E2E
         run: |
