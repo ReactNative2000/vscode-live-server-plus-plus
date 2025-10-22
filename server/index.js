@@ -135,10 +135,37 @@ if(!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM){
   console.warn('Twilio env vars not set — /send will not work until TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_FROM are configured');
 }
 
-const client = (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) ? require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN) : null;
+// Load optional integrations defensively so the server can run in CI without optional deps
+let client = null;
+if(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN){
+  try{
+    const twilioLib = require('twilio');
+    client = twilioLib(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+  }catch(e){
+    console.warn('twilio module not installed; SMS features disabled');
+    client = null;
+  }
+}
+
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
-const stripe = STRIPE_SECRET ? require('stripe')(STRIPE_SECRET) : null;
-const nodemailer = require('nodemailer');
+let stripe = null;
+if(STRIPE_SECRET){
+  try{
+    const stripeLib = require('stripe');
+    stripe = stripeLib(STRIPE_SECRET);
+  }catch(e){
+    console.warn('stripe module not installed; Stripe features disabled');
+    stripe = null;
+  }
+}
+
+let nodemailer = null;
+try{
+  nodemailer = require('nodemailer');
+}catch(e){
+  console.warn('nodemailer not installed; email features disabled');
+  nodemailer = null;
+}
 
 // Optional Sentry for error reporting (set SENTRY_DSN in env to enable)
 let sentry = null;
@@ -333,18 +360,34 @@ function requireAdmin(req,res,next){
   return res.status(401).json({ error: 'admin auth required' });
 }
 
-// File uploads (for validation docs)
-const multer = require('multer');
-const upload = multer({ dest: path.resolve(__dirname,'uploads') });
-app.post('/upload-verification', upload.single('file'), (req,res)=>{
-  try{
-    const file = req.file;
-    if(!file) return res.status(400).json({ error: 'file required' });
-    // Store filename in application notes for manual review (caller should pass application_id)
-    const appId = req.body.application_id;
-    if(appId){ db.run('UPDATE applications SET notes = COALESCE(notes,"") || ? WHERE id = ?', [`\nUPLOAD:${file.filename}`, appId]); }
-    res.json({ ok: true, file: file.filename });
-  }catch(err){ console.error(err); res.status(500).json({ error: err.message }); }
+// File uploads (for validation docs) — multer is optional
+let multer = null;
+let upload = null;
+try{
+  multer = require('multer');
+  upload = multer({ dest: path.resolve(__dirname,'uploads') });
+}catch(e){
+  console.warn('multer not installed; file upload endpoints disabled');
+  multer = null;
+  upload = null;
+}
+
+app.post('/upload-verification', (req,res)=>{
+  if(!upload){
+    return res.status(501).json({ error: 'file upload not supported on this server (multer not installed)' });
+  }
+  // delegate to multer middleware
+  upload.single('file')(req, res, (err)=>{
+    if(err) { console.error('Upload error', err); return res.status(500).json({ error: err.message }); }
+    try{
+      const file = req.file;
+      if(!file) return res.status(400).json({ error: 'file required' });
+      // Store filename in application notes for manual review (caller should pass application_id)
+      const appId = req.body.application_id;
+      if(appId){ db.run('UPDATE applications SET notes = COALESCE(notes,"") || ? WHERE id = ?', [`\nUPLOAD:${file.filename}`, appId]); }
+      res.json({ ok: true, file: file.filename });
+    }catch(err){ console.error(err); res.status(500).json({ error: err.message }); }
+  });
 });
 
 // Admin-protected route: list members
