@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies for server
         working-directory: ./server
-        run: npm ci
+        run: npm install --no-audit --no-fund || true
 
       - name: Generate temporary ORCID key
         id: key

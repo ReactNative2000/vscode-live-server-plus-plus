@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install deps
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Install puppeteer dependencies
         run: |
           sudo apt-get update
