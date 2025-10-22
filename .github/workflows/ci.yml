@@ -56,7 +56,8 @@ jobs:
             return 1
           }
 
-          wait_for http://127.0.0.1:8080 || (cat /tmp/http-server.log && exit 1)
+          # the http-server serves the contents of ./docs at root (/), so check root
+          wait_for http://127.0.0.1:8080/ || (cat /tmp/http-server.log && exit 1)
           wait_for http://127.0.0.1:3010/health || (cat /tmp/main-server.log && exit 1)
           wait_for http://127.0.0.1:4001/api/items || (cat /tmp/hospital.log && exit 1)
           wait_for http://127.0.0.1:5002/api/cases || (cat /tmp/homicide.log && exit 1)
@@ -68,6 +69,9 @@ jobs:
 
       - name: Start local demo servers and static docs
         run: |
+          # ensure native modules are rebuilt (helps sqlite3 on hosted runners)
+          npm rebuild || true
+
           # start main node server (ORCID endpoints) on 3010
           PORT=3010 npm start > /tmp/lspp-server.log 2>&1 &
           echo $! > /tmp/lspp-server.pid
@@ -109,6 +113,15 @@ jobs:
             echo "waiting for main server (ORCID)... ($i)"; sleep 1
             if [ $i -eq 30 ]; then tail -n +1 /tmp/lspp-server.log; exit 1; fi
           done
+
+      - name: Upload test artifacts (traces & logs)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces-and-logs
+          path: |
+            test-results/**/*.zip
+            /tmp/*.log
 
       - name: Run Playwright E2E
         run: |
