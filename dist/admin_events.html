@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Events</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:18px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #ddd;padding:6px;text-align:left;font-size:13px} th{background:#f4f4f4}</style>
+</head>
+<body>
+  <h2>Tracked events</h2>
+  <p>Use your admin token via the <code>x-admin-token</code> header or Basic auth.</p>
+  <div style="margin-bottom:12px">
+    <label>Admin token: <input id="adminToken" style="width:360px"></label>
+    <button id="loadBtn">Load events</button>
+    <a id="exportLink" href="#" style="margin-left:12px">Download CSV</a>
+  </div>
+  <div id="status"></div>
+  <table id="tbl"><thead><tr><th>id</th><th>ts</th><th>type</th><th>provider</th><th>label</th><th>path</th><th>ua</th></tr></thead><tbody></tbody></table>
+
+  <script>
+  async function loadEvents(){
+    const token = document.getElementById('adminToken').value.trim();
+    if(!token) return alert('Enter admin token');
+    document.getElementById('status').textContent = 'Loading...';
+    try{
+      const res = await fetch('/admin/events?limit=500', { headers: { 'x-admin-token': token } });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const j = await res.json();
+      const tbody = document.querySelector('#tbl tbody'); tbody.innerHTML = '';
+      j.events.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${e.id}</td><td>${new Date(e.created).toLocaleString()}</td><td>${e.type||''}</td><td>${e.provider||''}</td><td>${(e.label||'').substring(0,60)}</td><td>${e.path||''}</td><td>${(e.ua||'').substring(0,60)}</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('status').textContent = 'Loaded ' + (j.events||[]).length + ' events';
+      document.getElementById('exportLink').href = '/admin/export/events.csv?admin_token=' + encodeURIComponent(token);
+    }catch(err){ document.getElementById('status').textContent = 'Error: ' + err.message; }
+  }
+  document.getElementById('loadBtn').addEventListener('click', loadEvents);
+  </script>
+</body>
+</html>

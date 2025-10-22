@@ -1,5 +1,7 @@
 # Reflection Form — Project Overview
 
+[![CI](https://github.com/ReactNative2000/vscode-live-server-plus-plus/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/ReactNative2000/vscode-live-server-plus-plus/actions/workflows/ci.yml)
+
 This repository contains a resilient student reflection form and supporting documentation. The working form and PWA assets live under `/docs`.
 
 See `/docs` for usage, local testing, and admin tools.

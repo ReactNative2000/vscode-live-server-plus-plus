@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin — Payments</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#071322;color:#eef}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}a.button{background:#6b8e23;padding:6px 10px;border-radius:6px;color:#071226;text-decoration:none}</style>
+</head>
+<body>
+  <h1>Payments</h1>
+  <p>Provide admin token as `?admin_token=YOUR_TOKEN` (for testing only).</p>
+  <table id="payments"><thead><tr><th>ID</th><th>Stripe ID</th><th>Amount</th><th>Currency</th><th>Member ID</th><th>Created</th></tr></thead><tbody></tbody></table>
+  <script>
+    async function load(){
+      const params = new URLSearchParams(location.search);
+      const token = params.get('admin_token') || '';
+      const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+      const res = await fetch('/admin/payments', { headers });
+      if(!res.ok){ document.body.insertAdjacentHTML('beforeend','<p>Error fetching payments</p>'); return; }
+      const j = await res.json();
+      const tbody = document.querySelector('#payments tbody'); tbody.innerHTML='';
+      j.payments.forEach(p=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${p.id}</td><td>${p.stripe_id||''}</td><td>${(p.amount||'')}</td><td>${p.currency||''}</td><td>${p.member_id||''}</td><td>${new Date(p.created).toLocaleString()}</td>`; tbody.appendChild(tr); });
+    }
+    load();
+  </script>
+</body>
+</html>

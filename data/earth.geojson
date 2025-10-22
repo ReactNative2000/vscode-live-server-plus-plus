@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "name": "Earth",
+  "bbox": [-180, -90, 180, 90],
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Earth",
+        "description": "World bounding polygon (approximate)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-180.0, -90.0],
+            [180.0, -90.0],
+            [180.0, 90.0],
+            [-180.0, 90.0],
+            [-180.0, -90.0]
+          ]
+        ]
+      }
+    }
+  ]
+}

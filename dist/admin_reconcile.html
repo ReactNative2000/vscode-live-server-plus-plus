@@ -1,0 +1,592 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin — Record Cash App Payment</title>
+    <style>body{font-family:system-ui, -apple-system, Roboto, 'Segoe UI', Arial;padding:24px} label{display:block;margin-top:8px} input,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #ddd}</style>
+  </head>
+  <body>
+    <h1>Record Cash App Payment (Admin)</h1>
+    <p>This page lets an admin record a manual Cash App payment into the server using <code>/admin/record-cashapp</code>. You must supply admin auth (Authorization: Bearer &lt;ADMIN_TOKEN&gt;).</p>
+    <form id="rec-form">
+      <label>Amount (in cents)
+        <input id="amount" type="number" placeholder="e.g. 500 for $5.00" required />
+      </label>
+      <label>Currency
+        <input id="currency" type="text" value="USD" required />
+      </label>
+      <label>Txn ID
+        <input id="txn" type="text" placeholder="Cash App txn id" required />
+      </label>
+      <label>Payer email (optional)
+        <input id="payer" type="email" />
+      </label>
+      <label>Note
+        <textarea id="note" rows="3"></textarea>
+      </label>
+      <label>Admin Token (paste your ADMIN_TOKEN to authorize)
+        <input id="token" type="text" placeholder="ADMIN_TOKEN" required />
+      </label>
+      <p><button type="submit">Record</button></p>
+    </form>
+    <pre id="output" style="background:#f7f7f7;padding:12px;border-radius:6px;border:1px solid #eee"></pre>
+    <script>
+      document.getElementById('rec-form').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const body = { amount: parseInt(document.getElementById('amount').value,10), currency: document.getElementById('currency').value || 'USD', txn_id: document.getElementById('txn').value, payer_email: document.getElementById('payer').value || null, note: document.getElementById('note').value || '' };
+        const token = document.getElementById('token').value;
+        try{
+          const res = await fetch('/admin/record-cashapp', { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(body) });
+          const j = await res.json();
+          document.getElementById('output').textContent = JSON.stringify(j,null,2);
+        }catch(err){ document.getElementById('output').textContent = 'Error: ' + (err && err.message); }
+      });
+    </script>
+  </body>
+</html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Reconcile</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#071322;color:#eef}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}button{padding:6px 10px;border-radius:6px;background:#6b8e23;border:none;color:#071226}</style>
+</head>
+<body>
+  <h1>Reconcile payments</h1>
+  <p>Provide admin token as `?admin_token=...` (for testing). This UI loads payments and pending applications and allows assigning an application to a payment.</p>
+  <div style="display:flex;gap:20px;align-items:flex-start">
+    <div style="flex:1">
+      <h2>Payments</h2>
+      <table id="payments"><thead><tr><th>ID</th><th>Stripe ID</th><th>Amount</th><th>Member</th><th>Action</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div style="width:360px">
+      <h2>Pending applications</h2>
+      <table id="apps"><thead><tr><th>ID</th><th>Name</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <script>
+    async function loadAll(){
+  const params = new URLSearchParams(location.search);
+  const token = params.get('admin_token') || '';
+  const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+  const [pRes,aRes] = await Promise.all([fetch('/admin/payments', { headers }), fetch('/admin/applications', { headers })]);
+      const pJson = await pRes.json(); const aJson = await aRes.json();
+      const tbody = document.querySelector('#payments tbody'); tbody.innerHTML='';
+      pJson.payments.forEach(p=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${p.id}</td><td>${p.stripe_id||''}</td><td>${(p.amount||'')}</td><td>${p.member_id||''}</td><td><button onclick="assign(${p.id})">Assign</button></td>`; tbody.appendChild(tr); });
+      const appsTb = document.querySelector('#apps tbody'); appsTb.innerHTML=''; aJson.applications.filter(a=>a.status==='pending').forEach(a=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${a.id}</td><td>${a.name}</td>`; appsTb.appendChild(tr); });
+    }
+    function assign(paymentId){
+      const appId = prompt('Enter application ID to assign to payment '+paymentId);
+      if(!appId) return;
+      const token = new URLSearchParams(location.search).get('admin_token') || '';
+      const headers = Object.assign({'content-type':'application/json'}, token ? { 'Authorization': 'Bearer ' + token } : {});
+      fetch('/admin/reconcile',{method:'POST',headers:headers,body:JSON.stringify({payment_id:paymentId,application_id:parseInt(appId,10)})}).then(()=>loadAll()).catch(e=>{console.error(e);alert('Error');});
+    }
+    loadAll();
+  </script>
+</body>
+</html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Reconcile - Reflection Form</title>
+    <style>
+      body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; margin: 20px; }
+      table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background: #f7f7f8; }
+      .controls { display:flex; gap: 8px; align-items:center; }
+      .small { font-size: 0.9em; color: #444; }
+    </style>
+  </head>
+  <body>
+    <h1>Admin Reconcile</h1>
+    <p class="small">Upload CSV (export from Sheets) or paste JSON array of responses. Mark rows as paid and download the reconciliation CSV.</p>
+
+    <div class="controls">
+      <input id="file" type="file" accept="text/csv,application/json" />
+      <button id="pasteJson">Paste JSON</button>
+      <button id="downloadCsv">Download CSV</button>
+      <label class="small">Search: <input id="filter" placeholder="search name, token, game" /></label>
+    </div>
+
+    <div id="tableWrap"></div>
+
+    <script>
+      function parseCSV(text) {
+        const lines = text.split(/\r?\n/).filter(Boolean)
+        const headers = lines.shift().split(/,|\t/).map(h=>h.trim())
+        return lines.map(line => {
+          const cols = line.split(/,|\t/)
+          const obj = {}
+          headers.forEach((h,i)=> obj[h]= (cols[i]||'').trim())
+          return obj
+        })
+      }
+
+      function renderTable(items) {
+        const wrap = document.getElementById('tableWrap')
+        if (!items || !items.length) { wrap.innerHTML = '<p>No rows loaded.</p>'; return }
+        const cols = ['timestamp','fio','topic','game','token','whatsOnMind','chatPreview','paid','amount','txid']
+        const table = document.createElement('table')
+        const thead = document.createElement('thead')
+        thead.innerHTML = '<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>'
+        table.appendChild(thead)
+        const tbody = document.createElement('tbody')
+        items.forEach((row, idx)=>{
+          const tr = document.createElement('tr')
+          const chatPreview = Array.isArray(row.chat) ? row.chat.slice(-3).map(x=>x.message||x).join(' | ') : (row.chat||'')
+          const cells = [row.timestamp||row.time||'', row.fio||'', row.topic||'', row.game||'', row.token||'', row.whatsOnMind||'', chatPreview, row.paid||'', row.amount||'', row.txid||'']
+          tr.innerHTML = '<td>'+cells.join('</td><td>')+'</td>'
+          tbody.appendChild(tr)
+        })
+        table.appendChild(tbody)
+        wrap.innerHTML = ''
+        wrap.appendChild(table)
+      }
+
+      let current = []
+      document.getElementById('file').addEventListener('change', async (e)=>{
+        const f = e.target.files[0]
+        if (!f) return
+        const text = await f.text()
+        try {
+          if (f.type.includes('json')) { current = JSON.parse(text) }
+          else { current = parseCSV(text) }
+          renderTable(current)
+        } catch(err) { alert('Parse error: '+err.message) }
+      })
+
+      document.getElementById('pasteJson').addEventListener('click', ()=>{
+        const t = prompt('Paste JSON array of responses')
+        if (!t) return
+        try { current = JSON.parse(t); renderTable(current) } catch(err){ alert('Invalid JSON: '+err.message) }
+      })
+
+      document.getElementById('downloadCsv').addEventListener('click', ()=>{
+        if (!current.length) return alert('No rows loaded')
+        const cols = ['timestamp','fio','topic','game','token','whatsOnMind','chat','paid','amount','txid']
+        const csv = [cols.join(',')].concat(current.map(r=>cols.map(c=>`"${(r[c]||'').toString().replace(/"/g,'""')}"`).join(','))).join('\n')
+        const blob = new Blob([csv], {type:'text/csv'})
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url; a.download = 'reconcile.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+      })
+    </script>
+  </body>
+</html>
+<!doctype html>
+
+<html lang="ru">
+
+<head>
+
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Admin — Reconcile Payments</title>
+
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:20px;background:#f7f7f8;color:#111}
+    .card{max-width:1100px;margin:0 auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 20px rgba(10,12,20,.05)}
+    h1{margin:0 0 8px;font-size:20px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    textarea{width:100%;min-height:120px;padding:10px;border-radius:8px;border:1px solid #ddd}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+    th{background:#fafafa}
+    .small{font-size:13px;color:#666}
+    .btn{background:#2b8a3e;color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn.ghost{background:#eee;color:#111}
+    input[type=text]{padding:6px;border-radius:6px;border:1px solid #ddd}
+  </style>
+
+</head>
+
+<body>
+
+  <main class="card">
+
+    <h1>Admin — Reconcile Payments</h1>
+
+    <p class="small">Import form responses (CSV from Google Sheets or JSON), mark rows as paid, add transaction id/amount, and save reconciliation.</p>
+
+    <section>
+
+      <div class="controls">
+
+        <label class="small">Import CSV (export from Google Sheets):</label>
+
+        <input id="fileInput" type="file" accept="text/csv" />
+
+        <button id="clearBtn" class="btn ghost">Clear</button>
+
+      </div>
+
+      <div style="margin-top:8px">
+
+        <label class="small">Or paste JSON array of responses:</label>
+
+        <textarea id="pasteJson" placeholder='[ {"timestamp":"...","fio":"...","topic":"..."}, ... ]'></textarea>
+
+        <div class="controls">
+
+          <button id="parseJson" class="btn">Load JSON</button>
+
+          <button id="downloadTemplate" class="btn ghost">Download CSV Template</button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <section id="tableWrap">
+
+      <table id="responsesTable" style="display:none">
+
+        <thead>
+
+          <tr>
+
+            <th>#</th>
+
+            <th>Дата</th>
+
+            <th>ФИО</th>
+
+            <th>Тема</th>
+
+            <th>Game</th>
+
+            <th>Token</th>
+
+            <th>What's on mind</th>
+
+            <th>Chat (preview)</th>
+
+            <th>Оценка</th>
+
+            <th>Paid</th>
+
+            <th>Amount</th>
+
+            <th>Txn ID</th>
+
+            <th>Who</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody></tbody>
+
+      </table>
+
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+
+        <button id="saveLocal" class="btn">Save Reconciliation (local)</button>
+
+        <button id="downloadCsv" class="btn">Download CSV</button>
+
+        <input id="pushEndpoint" type="text" placeholder="Optional: Apps Script endpoint to POST reconciliation" style="width:420px" />
+
+        <input id="pushToken" type="text" placeholder="Optional: secret token for endpoint" style="width:220px" />
+
+        <button id="pushRemote" class="btn ghost">POST to Endpoint</button>
+
+      </div>
+
+    </section>
+
+    <div id="status" class="small" style="margin-top:12px"></div>
+
+  </main>
+
+  <script>
+
+    // Simple CSV parse (header first)
+
+    function parseCSV(text){
+
+      const lines = text.split(/\r?\n/).filter(l=>l.trim());
+
+      if(lines.length===0) return [];
+
+      const headers = lines[0].split(',').map(h=>h.trim());
+
+      return lines.slice(1).map((line)=>{
+
+        const parts = line.split(',');
+
+        const obj = {};
+
+        headers.forEach((h,i)=> obj[h]= (parts[i]||'').trim());
+
+        return obj;
+
+      });
+
+    }
+
+    const STORAGE_KEY = 'reflection_reconciliation_v1';
+
+    let rows = [];
+
+    const fileInput = document.getElementById('fileInput');
+
+    const pasteJson = document.getElementById('pasteJson');
+
+    const parseJson = document.getElementById('parseJson');
+
+    const responsesTable = document.getElementById('responsesTable');
+
+    const tbody = responsesTable.querySelector('tbody');
+
+    const saveLocal = document.getElementById('saveLocal');
+
+    const downloadCsv = document.getElementById('downloadCsv');
+
+    const status = document.getElementById('status');
+
+    const clearBtn = document.getElementById('clearBtn');
+
+    const downloadTemplate = document.getElementById('downloadTemplate');
+
+    const pushEndpoint = document.getElementById('pushEndpoint');
+
+    const pushRemote = document.getElementById('pushRemote');
+
+    function render(){
+
+      tbody.innerHTML='';
+
+      if(!rows.length){ responsesTable.style.display='none'; return; }
+
+      responsesTable.style.display='table';
+
+      rows.forEach((r, idx)=>{
+
+        const tr = document.createElement('tr');
+
+        // prepare chat preview
+
+        let chatPreview = '';
+
+        try{
+
+          if(Array.isArray(r.chat)) chatPreview = r.chat.slice(-2).map(c=> (c.text||c)).join(' \u2022 ');
+
+          else if(typeof r.chat === 'string'){
+
+            try{ const c = JSON.parse(r.chat); if(Array.isArray(c)) chatPreview = c.slice(-2).map(x=>x.text||x).join(' \u2022 '); else chatPreview = (r.chat+'').slice(0,80); }catch(e){ chatPreview = (r.chat+'').slice(0,80); }
+
+          }
+
+        }catch(e){ chatPreview = ''; }
+
+        tr.innerHTML = `
+
+          <td>${idx+1}</td>
+
+          <td>${r.timestamp || ''}</td>
+
+          <td>${r.fio || ''}</td>
+
+          <td>${r.topic || ''}</td>
+
+          <td>${r.game || ''}</td>
+
+          <td>${r.token || ''}</td>
+
+          <td>${(r.whatsOnMind||'').replace(/</g,'&lt;').slice(0,120)}</td>
+
+          <td>${(chatPreview||'').replace(/</g,'&lt;')}</td>
+
+          <td>${r.q3 || ''}</td>
+
+          <td><input data-idx='${idx}' class='paid' type='checkbox' ${r.paid? 'checked':''}></td>
+
+          <td><input data-idx='${idx}' class='amount' type='text' value='${r.amount||''}' /></td>
+
+          <td><input data-idx='${idx}' class='tx' type='text' value='${r.tx||''}' /></td>
+
+          <td><input data-idx='${idx}' class='who' type='text' value='${r.who||''}' /></td>
+
+        `;
+
+        tbody.appendChild(tr);
+
+      });
+
+      // wire inputs
+
+      tbody.querySelectorAll('.paid').forEach(cb => cb.addEventListener('change', e=> { rows[+e.target.dataset.idx].paid = e.target.checked; }));
+
+      tbody.querySelectorAll('.amount').forEach(inp => inp.addEventListener('input', e=> { rows[+e.target.dataset.idx].amount = e.target.value; }));
+
+      tbody.querySelectorAll('.tx').forEach(inp => inp.addEventListener('input', e=> { rows[+e.target.dataset.idx].tx = e.target.value; }));
+
+      tbody.querySelectorAll('.who').forEach(inp => inp.addEventListener('input', e=> { rows[+e.target.dataset.idx].who = e.target.value; }));
+
+    }
+
+    fileInput.addEventListener('change', e=>{
+
+      const f = e.target.files[0];
+
+      if(!f) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function(){
+
+        const data = parseCSV(reader.result);
+
+        rows = data.map(r => ({
+
+          timestamp: r.timestamp||r['Timestamp']||r['Дата']||'',
+
+          fio: r.fio||r['fio']||r['ФИО']||'',
+
+          topic: r.topic||r['topic']||r['Тема']||'',
+
+          game: r.game||r['game']||'',
+
+          token: r.token||r['token']||'',
+
+          whatsOnMind: r.whatsOnMind||r['whatsOnMind']||'',
+
+          chat: r.chat||r['chat']||'',
+
+          q3: r.q3||r['q3']||r['Оценка']||''
+
+        }));
+
+        render();
+
+      };
+
+      reader.readAsText(f,'utf-8');
+
+    });
+
+    parseJson.addEventListener('click', ()=>{
+
+      try{
+
+        const obj = JSON.parse(pasteJson.value);
+
+        if(!Array.isArray(obj)) throw new Error('Expected JSON array');
+
+        rows = obj.map(r=>({
+
+          timestamp: r.timestamp||r.Timestamp||r['Дата']||'',
+
+          fio: r.fio||r.FIO||r.Fio||'',
+
+          topic: r.topic||r.topic||r.Topic||'',
+
+          game: r.game||r.Game||'',
+
+          token: r.token||r.Token||'',
+
+          whatsOnMind: r.whatsOnMind||r.whatsOnMind||'',
+
+          chat: r.chat||r.Chat||'',
+
+          q3: r.q3||r.q3||''
+
+        }));
+
+        render();
+
+      }catch(err){ status.textContent = 'JSON parse error: ' + err.message; setTimeout(()=>status.textContent='',4000); }
+
+    });
+
+    clearBtn.addEventListener('click', ()=>{ rows = []; localStorage.removeItem(STORAGE_KEY); render(); status.textContent='Cleared'; setTimeout(()=>status.textContent='',2000); });
+
+    saveLocal.addEventListener('click', ()=>{
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+
+      status.textContent = 'Saved to localStorage'; setTimeout(()=>status.textContent='',2000);
+
+    });
+
+    downloadCsv.addEventListener('click', ()=>{
+
+      if(!rows.length) return;
+
+      const headers = ['timestamp','fio','topic','game','token','whatsOnMind','chat','q3','paid','amount','tx','who'];
+
+      const lines = [headers.join(',')];
+
+      rows.forEach(r=>{
+
+        lines.push(headers.map(h=>('"'+((r[h]||'')+'').replace(/"/g,'""')+'"')).join(','));
+
+      });
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a'); a.href = url; a.download = 'reconciliation.csv'; a.click(); URL.revokeObjectURL(url);
+
+    });
+
+    downloadTemplate.addEventListener('click', ()=>{
+
+      const template = 'timestamp,fio,topic,q3\n2025-10-17 12:00,Иванов И.И.,Тема,5\n';
+
+      const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a'); a.href = url; a.download = 'responses_template.csv'; a.click(); URL.revokeObjectURL(url);
+
+    });
+
+    pushRemote.addEventListener('click', async ()=>{
+
+      const endpoint = pushEndpoint.value.trim();
+
+      const token = document.getElementById('pushToken').value.trim();
+
+      if(!endpoint){ status.textContent='Enter endpoint URL'; return; }
+
+      try{
+
+        const payload = rows.map(r=> Object.assign({}, r, { _Type: 'reconciliation' }));
+
+        if(token) payload.forEach(p=> p.token = token);
+
+        const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+
+        if(res.ok) status.textContent='Pushed reconciliation to endpoint'; else status.textContent='Push failed: '+res.status;
+
+      }catch(err){ status.textContent='Push error: '+err.message; }
+
+      setTimeout(()=>status.textContent='',3000);
+
+    });
+
+    // Load saved reconciliations on open
+
+    (function(){
+
+      try{ const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); if(Array.isArray(saved) && saved.length){ rows = saved; render(); status.textContent='Loaded saved reconciliation (local)'; setTimeout(()=>status.textContent='',2000);} }catch(e){}
+
+    })();
+
+  </script>
+
+</body>
+
+</html>

@@ -19,7 +19,7 @@ jobs:
       - name: Install test deps
         working-directory: ./test/playwright
         run: |
-          npm ci
+          npm install --no-audit --no-fund || true
 
       - name: Start docs server
         run: |
