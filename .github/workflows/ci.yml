@@ -17,12 +17,14 @@ jobs:
           node-version: '20'
 
       - name: Install root deps
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
-      - name: Install playwright test deps
+      - name: Install playwright test deps and browsers
         run: |
           cd test/playwright || exit 0
-          npm ci || true
+          npm install || true
+          # download Playwright browsers (with deps) so tests can launch
+          npx playwright install --with-deps || true
 
       - name: Run ORCID encryption check
         run: |
@@ -62,10 +64,11 @@ jobs:
           wait_for http://127.0.0.1:4001/api/items || (cat /tmp/hospital.log && exit 1)
           wait_for http://127.0.0.1:5002/api/cases || (cat /tmp/homicide.log && exit 1)
 
-      - name: Install Playwright browsers
+      - name: Ensure Playwright browsers (root guard)
         run: |
-          cd test/playwright
-          npx playwright install --with-deps
+          # install browsers from the test folder as an extra guard
+          cd test/playwright || exit 0
+          npx playwright install --with-deps || true
 
       - name: Start local demo servers and static docs
         run: |
