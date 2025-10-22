@@ -31,39 +31,6 @@ jobs:
           KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
           ORCID_TOKEN_KEY="$KEY" NODE_PATH=server/node_modules node test/check_orcid_encryption.js
 
-      - name: Start local servers for E2E
-        run: |
-          echo "Starting static docs server on :8080 and demo APIs (3010,4001,5002)"
-          # start static docs server (http-server from dev deps)
-          npx http-server docs -p 8080 -c-1 > /tmp/http-server.log 2>&1 &
-          # start main Node server (ORCID endpoints) on 3010
-          PORT=3010 node server/index.js > /tmp/main-server.log 2>&1 &
-          # start hospital demo
-          PORT=4001 node server/hospital/index.js > /tmp/hospital.log 2>&1 &
-          # start homicide demo
-          PORT=5002 node server/homicide/index.js > /tmp/homicide.log 2>&1 &
-
-          # helper to wait for a URL to become available
-          wait_for() {
-            local url=$1; local retries=${2:-20}; local i
-            for i in $(seq 1 $retries); do
-              if curl -sSf --max-time 2 "$url" >/dev/null 2>&1; then
-                echo "OK: $url"
-                return 0
-              fi
-              echo "Waiting for $url ($i/$retries)..."
-              sleep 1
-            done
-            echo "ERROR: $url did not become available"
-            return 1
-          }
-
-          # the http-server serves the contents of ./docs at root (/), so check root
-          wait_for http://127.0.0.1:8080/ || (cat /tmp/http-server.log && exit 1)
-          wait_for http://127.0.0.1:3010/health || (cat /tmp/main-server.log && exit 1)
-          wait_for http://127.0.0.1:4001/api/items || (cat /tmp/hospital.log && exit 1)
-          wait_for http://127.0.0.1:5002/api/cases || (cat /tmp/homicide.log && exit 1)
-
       - name: Ensure Playwright browsers (root guard)
         run: |
           # install browsers from the test folder as an extra guard
