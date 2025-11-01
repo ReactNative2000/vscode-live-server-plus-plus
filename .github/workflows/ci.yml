@@ -26,6 +26,19 @@ jobs:
           # download Playwright browsers (with deps) so tests can launch
           npx playwright install --with-deps || true
 
+      - name: Install server deps
+        run: |
+          # install dependencies for the demo servers (they have their own package.json)
+          cd server || exit 0
+          npm install --no-audit --no-fund || true
+
+      - name: Verify server node_modules
+        run: |
+          echo "server/node_modules listing:" || true
+          ls -la server/node_modules || true
+          echo "top-level node_modules listing:" || true
+          ls -la node_modules || true
+
       - name: Run ORCID encryption check
         run: |
           KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")
@@ -36,6 +49,11 @@ jobs:
           # install browsers from the test folder as an extra guard
           cd test/playwright || exit 0
           npx playwright install --with-deps || true
+
+      - name: Show Playwright cache (debug)
+        run: |
+          echo "Playwright cache listing:" || true
+          ls -la ~/.cache/ms-playwright || true
 
       - name: Start local demo servers and static docs
         run: |
