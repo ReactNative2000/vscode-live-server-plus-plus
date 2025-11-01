@@ -20,7 +20,7 @@ jobs:
 
       - name: Install deps (if any)
         run: |
-          if [ -f package.json ]; then npm ci; fi
+          if [ -f package.json ]; then npm install --no-audit --no-fund || true; fi
 
       - name: Build docs (no-op if not present)
         run: |

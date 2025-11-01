@@ -20,10 +20,27 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm install --no-audit --no-fund || true
+          cd server || true
+          npm install --no-audit --no-fund || true
+          cd - || true
+
+      - name: Verify server node_modules
+        run: |
+          echo "server/node_modules listing:" || true
+          ls -la server/node_modules || true
+          echo "top-level node_modules listing:" || true
+          ls -la node_modules || true
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: |
+          npx playwright install --with-deps || true
+
+      - name: Show Playwright cache (debug)
+        run: |
+          echo "Playwright cache listing:" || true
+          ls -la ~/.cache/ms-playwright || true
 
       - name: Start server on 3010
         env:

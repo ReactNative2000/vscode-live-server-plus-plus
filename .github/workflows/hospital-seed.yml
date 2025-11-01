@@ -14,7 +14,7 @@ jobs:
           node-version: '22'
       - name: Install deps
         working-directory: server/hospital
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Run seed
         working-directory: server/hospital
         run: node seed.js

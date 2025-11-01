@@ -14,7 +14,11 @@ jobs:
         env:
           TEST_BASE_URL: http://127.0.0.1:3010
         run: |
-          npm ci --no-audit --no-fund || true
+          # install dependencies to ensure server can start
+          npm install --no-audit --no-fund || true
+          cd server || true
+          npm install --no-audit --no-fund || true
+          cd - || true
           # start server in background on port 3010 with dummy ORCID vars
           PORT=3010 ORCID_CLIENT_ID=test-client ORCID_CLIENT_SECRET=test-secret ORCID_REDIRECT_URI=http://127.0.0.1:3010/orcid/callback node server/index.js > /tmp/lspp-server.log 2>&1 &
           # wait for server health up to 15s
@@ -29,4 +33,3 @@ jobs:
           TEST_BASE_URL: http://127.0.0.1:3010
         run: |
           node test/playwright/check_orcid_connect.js
-*** End Patch

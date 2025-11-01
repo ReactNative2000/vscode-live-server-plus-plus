@@ -1,0 +1,6 @@
+services:
+  vscodeliveserverplusplus:
+    image: vscodeliveserverplusplus
+    build:
+      context: .
+      dockerfile: ./Dockerfile

@@ -15,6 +15,27 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"type": "docker-build",
+			"label": "docker-build",
+			"platform": "python",
+			"dockerBuild": {
+				"tag": "vscodeliveserverplusplus:latest",
+				"dockerfile": "${workspaceFolder}/Dockerfile",
+				"context": "${workspaceFolder}",
+				"pull": true
+			}
+		},
+		{
+			"type": "docker-run",
+			"label": "docker-run: debug",
+			"dependsOn": [
+				"docker-build"
+			],
+			"python": {
+				"file": "agent-rag/rag.py"
+			}
 		}
 	]
 }

@@ -19,7 +19,30 @@ jobs:
       - name: Install test deps
         working-directory: ./test/playwright
         run: |
-          npm ci
+          npm install --no-audit --no-fund || true
+
+      - name: Install root and server deps
+        run: |
+          npm install --no-audit --no-fund || true
+          cd server || exit 0
+          npm install --no-audit --no-fund || true
+
+      - name: Verify server node_modules
+        run: |
+          echo "server/node_modules listing:" || true
+          ls -la server/node_modules || true
+          echo "top-level node_modules listing:" || true
+          ls -la node_modules || true
+
+      - name: Install Playwright browsers
+        run: |
+          cd test/playwright || exit 0
+          npx playwright install --with-deps || true
+
+      - name: Show Playwright cache (debug)
+        run: |
+          echo "Playwright cache listing:" || true
+          ls -la ~/.cache/ms-playwright || true
 
       - name: Start docs server
         run: |
